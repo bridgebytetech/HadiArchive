@@ -5,7 +5,9 @@ const BASE_URL = '/writings';
 const ADMIN_URL = '/admin/writings';
 
 export const writingService = {
+  // ---------------------
   // Public APIs
+  // ---------------------
   getAll: async (page = 0, size = 20): Promise<PagedResponse<Writing>> => {
     return apiRequest(api.get(`${BASE_URL}?page=${page}&size=${size}`));
   },
@@ -14,9 +16,20 @@ export const writingService = {
     return apiRequest(api.get(`${BASE_URL}/${id}`));
   },
 
+  getFeatured: async (limit = 4): Promise<Writing[]> => {
+    return apiRequest(api.get(`${BASE_URL}/featured?limit=${limit}`));
+  },
+
+  // ---------------------
   // Admin APIs
+  // ---------------------
   adminGetAll: async (page = 0, size = 20): Promise<PagedResponse<Writing>> => {
     return apiRequest(api.get(`${ADMIN_URL}?page=${page}&size=${size}`));
+  },
+
+  // ✅ Added adminGetById
+  adminGetById: async (id: string): Promise<Writing> => {
+    return apiRequest(api.get(`${ADMIN_URL}/${id}`));
   },
 
   create: async (data: Partial<Writing>): Promise<Writing> => {
@@ -33,5 +46,9 @@ export const writingService = {
 
   togglePublish: async (id: string): Promise<Writing> => {
     return apiRequest(api.patch(`${ADMIN_URL}/${id}/publish`));
+  },
+
+  toggleFeatured: async (id: string): Promise<Writing> => {
+    return apiRequest(api.patch(`${ADMIN_URL}/${id}/feature`));
   },
 };
