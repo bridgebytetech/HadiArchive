@@ -1,11 +1,13 @@
 import api, { apiRequest } from '@/lib/api';
-import { Video, VideoRequest, PagedResponse, ApiResponse } from '@/types';
+import { Video, VideoRequest, PagedResponse } from '@/types';
 
 const BASE_URL = '/videos';
 const ADMIN_URL = '/admin/videos';
 
 export const videoService = {
+  // ---------------------
   // Public APIs
+  // ---------------------
   getAll: async (page = 0, size = 20): Promise<PagedResponse<Video>> => {
     return apiRequest(api.get(`${BASE_URL}?page=${page}&size=${size}`));
   },
@@ -22,11 +24,14 @@ export const videoService = {
     return apiRequest(api.get(`${BASE_URL}/latest?limit=${limit}`));
   },
 
+  // ---------------------
   // Admin APIs
+  // ---------------------
   adminGetAll: async (page = 0, size = 20): Promise<PagedResponse<Video>> => {
     return apiRequest(api.get(`${ADMIN_URL}?page=${page}&size=${size}`));
   },
 
+  // ✅ adminGetById
   adminGetById: async (id: string): Promise<Video> => {
     return apiRequest(api.get(`${ADMIN_URL}/${id}`));
   },
