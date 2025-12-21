@@ -30,12 +30,8 @@ export default function SingleTributePage() {
   const { data: tribute, isLoading } = useQuery({
     queryKey: ["publicTribute", id],
     queryFn: () => tributePublicService.getById(id),
+    enabled: !!id,
   });
-
-  const content = language === "bn" ? tribute?.contentBn : tribute?.contentEn || tribute?.contentBn;
-  const tributeTypeLabel = TRIBUTE_TYPES.find(
-    (t) => t.value === tribute?.tributeType
-  );
 
   if (isLoading) {
     return <SingleTributeSkeleton />;
@@ -44,6 +40,11 @@ export default function SingleTributePage() {
   if (!tribute) {
     return <div className="p-10 text-center">Tribute not found.</div>;
   }
+
+  const content = language === "bn" ? tribute?.contentBn : tribute?.contentEn || tribute?.contentBn;
+  const tributeTypeLabel = TRIBUTE_TYPES.find(
+    (t) => t.value === tribute?.tributeType
+  );
 
   return (
     <>
