@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout";
 import Pagination from "@/components/admin/Pagination";
-// নিচে এই নতুন সার্ভিসটি ইম্পোর্ট করা হয়েছে
 import { tributePublicService } from "@/services/publicTributeService";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Tribute } from "@/types";
@@ -24,7 +23,6 @@ export default function TributesPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["publicTributes", page],
-    // এখানে tributeService এর পরিবর্তে publicTributeService ব্যবহার করা হয়েছে
     queryFn: () => tributePublicService.getAll(page),
   });
 
@@ -146,11 +144,9 @@ function TributeCard({
   );
 
   return (
-    // এই Link ট্যাগটি যোগ করা হয়েছে
     <Link href={`/tributes/${tribute.id}`} className="group block">
       <Card className="h-full card-hover">
         <CardContent className="p-6 flex flex-col h-full">
-          {/* Quote Icon & Type */}
           <div className="flex items-start justify-between mb-4">
             <Quote className="h-8 w-8 text-memorial-green/20" />
             {tribute.tributeType && tributeTypeLabel && (
@@ -159,18 +155,12 @@ function TributeCard({
               </Badge>
             )}
           </div>
-
-          {/* Content */}
           <p className="text-gray-700 flex-1 mb-6 line-clamp-4 group-hover:text-memorial-green transition-colors">
             {truncate(content, 250)}
           </p>
-
-          {/* Featured Badge */}
           {tribute.featured && (
             <Badge className="bg-memorial-gold w-fit mb-4">Featured</Badge>
           )}
-
-          {/* Author */}
           <div className="flex items-center gap-3 pt-4 border-t">
             <Avatar>
               <AvatarImage src={tribute.authorPhoto} />
