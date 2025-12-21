@@ -4,19 +4,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'i.ibb.co',
+        hostname: '**',
       },
       {
-        protocol: 'https',
-        hostname: 'img.youtube.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.imgbb.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'placehold.co', // <--- এই লাইনটা নতুন যোগ করা হয়েছে
+        protocol: 'http',
+        hostname: '**',
       },
     ],
   },
