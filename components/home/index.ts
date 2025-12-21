@@ -1,0 +1,9 @@
+export { default as HeroSection } from './HeroSection';
+export { default as FeaturedQuote } from './FeaturedQuote';
+export { default as QuickNavigation } from './QuickNavigation';
+export { default as LatestVideos } from './LatestVideos';
+export { default as PhotoGalleryPreview } from './PhotoGalleryPreview';
+export { default as TimelineSummary } from './TimelineSummary';
+export { default as FeaturedEvents } from './FeaturedEvents';
+export { default as RecentTributes } from './RecentTributes';
+export { default as CallToAction } from './CallToAction';
