@@ -2,11 +2,9 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'ax
 import Cookies from 'js-cookie';
 import { ApiResponse } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
-
-// Create axios instance
+// Create axios instance with a relative baseURL
 const api: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: '/api', // এটা /api হবে, full URL না
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -32,7 +30,6 @@ api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiResponse<null>>) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect
       Cookies.remove('admin_token');
       if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
         window.location.href = '/admin/login';
