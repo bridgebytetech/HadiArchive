@@ -10,7 +10,8 @@ import {
   Phone, 
   MapPin,
   Heart,
-  ExternalLink
+  ExternalLink,
+  Code
 } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { OSMAN_HADI_INFO, SITE_CONFIG } from "@/lib/constants";
@@ -37,12 +38,10 @@ const footerLinks = {
     { href: "/tributes", labelBn: "শ্রদ্ধাঞ্জলি", labelEn: "Tributes" },
     { href: "/news", labelBn: "সংবাদ", labelEn: "News" },
     { href: "/contact", labelBn: "যোগাযোগ", labelEn: "Contact" },
-
     { href: "/documents", labelBn: "ডকুমেন্টস", labelEn: "Documents" },
-{ href: "/social-posts", labelBn: "সোশ্যাল পোস্ট", labelEn: "Social Posts" },
-{ href: "/requests", labelBn: "রিকোয়েস্ট", labelEn: "Requests" },
+    { href: "/social-posts", labelBn: "সোশ্যাল পোস্ট", labelEn: "Social Posts" },
+    { href: "/requests", labelBn: "রিকোয়েস্ট", labelEn: "Requests" },
   ],
-  
 };
 
 const socialLinks = [
@@ -50,13 +49,15 @@ const socialLinks = [
   { href: "https://twitter.com", icon: Twitter, label: "Twitter" },
   { href: "https://youtube.com", icon: Youtube, label: "YouTube" },
 ];
+
 const developerLinks = {
   name: "Bridge Byte Tech",
-  main: "https://www.facebook.com/bridgebytetech",
+  main: "https://www.bridgebytetech.com",
   youtube: "https://www.youtube.com/@bridgebytetech",
   facebook: "https://www.facebook.com/bridgebytetech",
   instagram: "https://www.instagram.com/bridgebytetech/",
 };
+
 export default function Footer() {
   const { t, language } = useLanguage();
   const currentYear = new Date().getFullYear();
@@ -197,84 +198,83 @@ export default function Footer() {
         </div>
       </div>
 
-{/* Bottom Bar */}
-<div className="border-t border-white/10">
-  <div className="container-memorial py-6">
-    <div className="flex flex-col gap-4 text-sm text-white/60">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-        <p className="text-center lg:text-left">
-          © {currentYear}{" "}
-          {t(
-            "Bridge Byte Tech",
-            "Bridge Byte Tech"
-          )}
-          {" • "}
-          {t("All rights reserved", "All rights reserved")}
-        </p>
+      {/* Bottom Bar */}
+      <div className="border-t border-white/10">
+        <div className="container-memorial py-6">
+          <div className="flex flex-col gap-4 text-sm text-white/60">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+              <p className="text-center lg:text-left">
+                © {currentYear}{" "}
+                {t("Bridge Byte Tech", "Bridge Byte Tech")}
+                {" • "}
+                {t("All rights reserved", "All rights reserved")}
+              </p>
 
-        {/* Developer Credit */}
-        <p className="text-center">
-          {t("শহীদ ওসমান হাদির স্মরণে — ", "In memory of Shaheed Osman Hadi — ")}
-          <a
-            href={developerLinks.main}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-white hover:text-memorial-gold transition-colors underline underline-offset-4"
-          >
-            {t("Developed by ", "Developed by ")}
-            {developerLinks.name}
-          </a>
-        </p>
+              {/* Developer Credit */}
+              <p className="text-center">
+                {t("শহীদ ওসমান হাদির স্মরণে — ", "In memory of Shaheed Osman Hadi — ")}
+                <Link
+                  href="/about-developer"
+                  className="font-medium text-white hover:text-memorial-gold transition-colors underline underline-offset-4"
+                >
+                  {t("Developed by ", "Developed by ")}
+                  {developerLinks.name}
+                </Link>
+              </p>
 
-        {/* Policy links */}
-        <div className="flex items-center gap-4">
-          <Link href="/privacy" className="hover:text-white transition-colors">
-            {t("গোপনীয়তা নীতি", "Privacy Policy")}
-          </Link>
-          <Link href="/terms" className="hover:text-white transition-colors">
-            {t("শর্তাবলী", "Terms")}
-          </Link>
+              {/* Policy links */}
+              <div className="flex items-center gap-4">
+                <Link href="/privacy" className="hover:text-white transition-colors">
+                  {t("গোপনীয়তা নীতি", "Privacy Policy")}
+                </Link>
+                <Link href="/terms" className="hover:text-white transition-colors">
+                  {t("শর্তাবলী", "Terms")}
+                </Link>
+                <Link href="/about-developer" className="hover:text-white transition-colors flex items-center gap-1">
+                  <Code className="h-3 w-3" />
+                  {t("ডেভেলপার", "Developer")}
+                </Link>
+              </div>
+            </div>
+
+            {/* Developer Social Icons */}
+            <div className="flex items-center justify-center lg:justify-end gap-3">
+              <a
+                href={developerLinks.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-memorial-green transition-colors"
+                aria-label="Bridge Byte Tech YouTube"
+                title="Bridge Byte Tech YouTube"
+              >
+                <Youtube className="h-4 w-4 text-white" />
+              </a>
+
+              <a
+                href={developerLinks.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-memorial-green transition-colors"
+                aria-label="Bridge Byte Tech Facebook"
+                title="Bridge Byte Tech Facebook"
+              >
+                <Facebook className="h-4 w-4 text-white" />
+              </a>
+
+              <a
+                href={developerLinks.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-memorial-green transition-colors"
+                aria-label="Bridge Byte Tech Instagram"
+                title="Bridge Byte Tech Instagram"
+              >
+                <span className="text-[11px] font-semibold text-white">IG</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Developer Social Icons */}
-      <div className="flex items-center justify-center lg:justify-end gap-3">
-        <a
-          href={developerLinks.youtube}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-memorial-green transition-colors"
-          aria-label="Bridge Byte Tech YouTube"
-          title="Bridge Byte Tech YouTube"
-        >
-          <Youtube className="h-4 w-4 text-white" />
-        </a>
-
-        <a
-          href={developerLinks.facebook}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-memorial-green transition-colors"
-          aria-label="Bridge Byte Tech Facebook"
-          title="Bridge Byte Tech Facebook"
-        >
-          <Facebook className="h-4 w-4 text-white" />
-        </a>
-
-        <a
-          href={developerLinks.instagram}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-memorial-green transition-colors"
-          aria-label="Bridge Byte Tech Instagram"
-          title="Bridge Byte Tech Instagram"
-        >
-          <span className="text-[11px] font-semibold text-white">IG</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
     </footer>
   );
 }
