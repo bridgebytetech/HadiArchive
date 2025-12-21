@@ -150,7 +150,7 @@ export default function ContactPage() {
                       <div>
                         <p className="font-medium">{t("ফোন", "Phone")}</p>
                         <p className="text-sm text-muted-foreground">
-                          +33 749797394
+                          Not Available
                         </p>
                       </div>
                     </div>
