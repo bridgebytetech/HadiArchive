@@ -28,14 +28,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "bn_BD",
     alternateLocale: "en_US",
-    url: "https://shaheedosmanhadir.org",
+    url: "https://www.hadiarchive.com",
     siteName: "শহীদ ওসমান হাদির স্মৃতি সংগ্রহশালা",
     title: "শহীদ ওসমান হাদির স্মৃতি সংগ্রহশালা",
     description:
       "শহীদ শরীফ ওসমান বিন হাদির জীবন, কর্ম ও আদর্শের ডিজিটাল সংগ্রহশালা",
     images: [
       {
-        url: "/images/og-image.jpg",
+        url: "/images/osman-hadi-portrait.jpg",
         width: 1200,
         height: 630,
         alt: "শহীদ ওসমান হাদি",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "শহীদ ওসমান হাদির স্মৃতি সংগ্রহশালা",
     description:
       "শহীদ শরীফ ওসমান বিন হাদির জীবন, কর্ম ও আদর্শের ডিজিটাল সংগ্রহশালা",
-    images: ["/images/og-image.jpg"],
+    images: ["/images/osman-hadi-portrait.jpg"],
   },
   robots: {
     index: true,
