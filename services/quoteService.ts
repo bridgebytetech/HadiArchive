@@ -5,7 +5,9 @@ const BASE_URL = '/quotes';
 const ADMIN_URL = '/admin/quotes';
 
 export const quoteService = {
+  // ---------------------
   // Public APIs
+  // ---------------------
   getAll: async (page = 0, size = 20): Promise<PagedResponse<Quote>> => {
     return apiRequest(api.get(`${BASE_URL}?page=${page}&size=${size}`));
   },
@@ -18,9 +20,19 @@ export const quoteService = {
     return apiRequest(api.get(`${BASE_URL}/featured`));
   },
 
+  getById: async (id: string): Promise<Quote> => {
+    return apiRequest(api.get(`${BASE_URL}/${id}`));
+  },
+
+  // ---------------------
   // Admin APIs
+  // ---------------------
   adminGetAll: async (page = 0, size = 20): Promise<PagedResponse<Quote>> => {
     return apiRequest(api.get(`${ADMIN_URL}?page=${page}&size=${size}`));
+  },
+
+  adminGetById: async (id: string): Promise<Quote> => {
+    return apiRequest(api.get(`${ADMIN_URL}/${id}`));
   },
 
   create: async (data: Partial<Quote>): Promise<Quote> => {
@@ -37,5 +49,9 @@ export const quoteService = {
 
   togglePublish: async (id: string): Promise<Quote> => {
     return apiRequest(api.patch(`${ADMIN_URL}/${id}/publish`));
+  },
+
+  toggleFeatured: async (id: string): Promise<Quote> => {
+    return apiRequest(api.patch(`${ADMIN_URL}/${id}/feature`));
   },
 };
