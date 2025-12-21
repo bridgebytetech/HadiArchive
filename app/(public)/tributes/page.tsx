@@ -11,10 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout";
 import Pagination from "@/components/admin/Pagination";
-import { tributeService } from "@/services/tributeService";
+// নিচে এই নতুন সার্ভিসটি ইম্পোর্ট করা হয়েছে
+import { tributePublicService } from "@/services/publicTributeService";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Tribute } from "@/types";
-import { formatRelativeTime, truncate } from "@/lib/utils";
+import { truncate } from "@/lib/utils";
 import { TRIBUTE_TYPES } from "@/lib/constants";
 
 export default function TributesPage() {
@@ -22,8 +23,9 @@ export default function TributesPage() {
   const [page, setPage] = useState(0);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["tributes", page],
-    queryFn: () => tributeService.getAll(page, 12),
+    queryKey: ["publicTributes", page],
+    // এখানে tributeService এর পরিবর্তে publicTributeService ব্যবহার করা হয়েছে
+    queryFn: () => tributePublicService.getAll(page),
   });
 
   const tributes = data?.content || [];
@@ -48,7 +50,6 @@ export default function TributesPage() {
 
       <section className="py-8 md:py-12">
         <div className="container-memorial">
-          {/* Results Count */}
           <p className="text-muted-foreground mb-6">
             {t(
               `মোট ${data?.totalElements || 0} টি শ্রদ্ধাঞ্জলি`,
@@ -56,7 +57,6 @@ export default function TributesPage() {
             )}
           </p>
 
-          {/* Tributes Grid */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
@@ -67,10 +67,7 @@ export default function TributesPage() {
             <div className="text-center py-12">
               <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground mb-4">
-                {t(
-                  "এখনো কোনো শ্রদ্ধাঞ্জলি নেই",
-                  "No tributes yet"
-                )}
+                {t("এখনো কোনো শ্রদ্ধাঞ্জলি নেই", "No tributes yet")}
               </p>
               <Button asChild>
                 <Link href="/tributes/submit">
@@ -90,7 +87,6 @@ export default function TributesPage() {
             </div>
           )}
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-10">
               <Pagination
@@ -101,7 +97,6 @@ export default function TributesPage() {
             </div>
           )}
 
-          {/* CTA */}
           <div className="mt-12 text-center">
             <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-6 bg-memorial-green/5 rounded-2xl border border-memorial-green/20">
               <div className="w-14 h-14 rounded-full bg-memorial-green/10 flex items-center justify-center">
@@ -151,53 +146,56 @@ function TributeCard({
   );
 
   return (
-    <Card className="h-full card-hover">
-      <CardContent className="p-6 flex flex-col h-full">
-        {/* Quote Icon & Type */}
-        <div className="flex items-start justify-between mb-4">
-          <Quote className="h-8 w-8 text-memorial-green/20" />
-          {tribute.tributeType && tributeTypeLabel && (
-            <Badge variant="secondary">
-              {isBangla ? tributeTypeLabel.labelBn : tributeTypeLabel.labelEn}
-            </Badge>
+    // এই Link ট্যাগটি যোগ করা হয়েছে
+    <Link href={`/tributes/${tribute.id}`} className="group block">
+      <Card className="h-full card-hover">
+        <CardContent className="p-6 flex flex-col h-full">
+          {/* Quote Icon & Type */}
+          <div className="flex items-start justify-between mb-4">
+            <Quote className="h-8 w-8 text-memorial-green/20" />
+            {tribute.tributeType && tributeTypeLabel && (
+              <Badge variant="secondary">
+                {isBangla ? tributeTypeLabel.labelBn : tributeTypeLabel.labelEn}
+              </Badge>
+            )}
+          </div>
+
+          {/* Content */}
+          <p className="text-gray-700 flex-1 mb-6 line-clamp-4 group-hover:text-memorial-green transition-colors">
+            {truncate(content, 250)}
+          </p>
+
+          {/* Featured Badge */}
+          {tribute.featured && (
+            <Badge className="bg-memorial-gold w-fit mb-4">Featured</Badge>
           )}
-        </div>
 
-        {/* Content */}
-        <p className="text-gray-700 flex-1 mb-6 line-clamp-4">
-          {truncate(content, 250)}
-        </p>
-
-        {/* Featured Badge */}
-        {tribute.featured && (
-          <Badge className="bg-memorial-gold w-fit mb-4">Featured</Badge>
-        )}
-
-        {/* Author */}
-        <div className="flex items-center gap-3 pt-4 border-t">
-          <Avatar>
-            <AvatarImage src={tribute.authorPhoto} />
-            <AvatarFallback className="bg-memorial-green/10 text-memorial-green">
-              {tribute.authorName?.charAt(0) || "A"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium truncate">{tribute.authorName}</p>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              {tribute.authorLocation && (
-                <>
-                  <MapPin className="h-3 w-3" />
-                  <span className="truncate">{tribute.authorLocation}</span>
-                </>
-              )}
-              {!tribute.authorLocation && tribute.authorRelation && (
-                <span className="truncate">{tribute.authorRelation}</span>
-              )}
+          {/* Author */}
+          <div className="flex items-center gap-3 pt-4 border-t">
+            <Avatar>
+              <AvatarImage src={tribute.authorPhoto} />
+              <AvatarFallback className="bg-memorial-green/10 text-memorial-green">
+                {tribute.authorName?.charAt(0) || "A"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium truncate">{tribute.authorName}</p>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {tribute.authorLocation && (
+                  <>
+                    <MapPin className="h-3 w-3" />
+                    <span className="truncate">{tribute.authorLocation}</span>
+                  </>
+                )}
+                {!tribute.authorLocation && tribute.authorRelation && (
+                  <span className="truncate">{tribute.authorRelation}</span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
