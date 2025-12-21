@@ -3,12 +3,7 @@
 import React from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import {
-  MapPin,
-  User,
-  Calendar,
-  ChevronLeft,
-} from "lucide-react";
+import { MapPin, User, Calendar, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -27,18 +22,42 @@ export default function SingleTributePage() {
   const id = params.id as string;
   const { t, language, isBangla } = useLanguage();
 
-  const { data: tribute, isLoading } = useQuery({
+  // Debugging: id আসছে কি না চেক করা
+  console.log("Tribute ID from URL:", id);
+
+  const { data: tribute, isLoading, error } = useQuery({
     queryKey: ["publicTribute", id],
-    queryFn: () => tributePublicService.getById(id),
-    enabled: !!id,
+    queryFn: () => {
+      console.log("Fetching tribute with ID:", id);
+      return tributePublicService.getById(id);
+    },
+    enabled: !!id, // id থাকলে তবেই API কল হবে
   });
+
+  // Debugging: API থেকে কী আসছে দেখা
+  if (error) {
+    console.error("API Error fetching tribute:", error);
+  }
 
   if (isLoading) {
     return <SingleTributeSkeleton />;
   }
 
   if (!tribute) {
-    return <div className="p-10 text-center">Tribute not found.</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <h2 className="text-xl font-semibold">Tribute Not Found</h2>
+        <p className="text-muted-foreground mt-2">
+          The tribute you are looking for does not exist or has been removed.
+        </p>
+        <Button asChild variant="outline" className="mt-4">
+          <Link href="/tributes">
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Back to Tributes
+          </Link>
+        </Button>
+      </div>
+    );
   }
 
   const content = language === "bn" ? tribute?.contentBn : tribute?.contentEn || tribute?.contentBn;
@@ -63,7 +82,6 @@ export default function SingleTributePage() {
         <div className="container-memorial max-w-4xl">
           <Card>
             <CardContent className="p-6 md:p-8">
-              {/* Header */}
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
@@ -105,22 +123,18 @@ export default function SingleTributePage() {
 
               <Separator />
 
-              {/* Main Content */}
               <article className="prose prose-lg max-w-none mt-6">
                 <div className="whitespace-pre-line leading-relaxed text-gray-700">
                   {content}
                 </div>
               </article>
 
-              {/* Footer */}
               {tribute.submittedAt && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-8 border-t pt-4">
                   <Calendar className="h-3 w-3" />
                   <span>
                     {t("জমা দেওয়া হয়েছে:", "Submitted:")}{" "}
-                    {isBangla
-                      ? formatDate(tribute.submittedAt)
-                      : formatDateEn(tribute.submittedAt)}
+                    {isBangla ? formatDate(tribute.submittedAt) : formatDateEn(tribute.submittedAt)}
                   </span>
                 </div>
               )}
