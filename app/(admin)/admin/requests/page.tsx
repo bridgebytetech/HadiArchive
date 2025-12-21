@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Inbox,
   Eye,
   Trash2,
   CheckCircle,
@@ -12,10 +11,12 @@ import {
   User,
   Mail,
   Phone,
-  FileText,
   Calendar,
   Link as LinkIcon,
-  X,
+  Inbox,
+  FileText,
+  MessageSquare,
+  UserCheck,
 } from "lucide-react";
 import {
   AdminLayout,
@@ -38,7 +39,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { requestService } from "@/services/requestService";
 import { PublicRequest } from "@/types";
@@ -51,27 +51,21 @@ export default function AdminRequestsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<PublicRequest | null>(null);
 
-  // সব রিকোয়েস্ট ফেচ করা
   const { data, isLoading } = useQuery({
     queryKey: ["adminRequests", page],
     queryFn: () => requestService.getAll(page, 10),
   });
 
-  // স্ট্যাটাস আপডেট মিউটেশন
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       requestService.updateStatus(id, status),
     onSuccess: () => {
       toast.success("স্ট্যাটাস আপডেট হয়েছে");
       queryClient.invalidateQueries({ queryKey: ["adminRequests"] });
-      // Modal এ থাকলে সেখানেও update করা
-      if (selectedRequest) {
-        setSelectedRequest(null);
-      }
+      setSelectedRequest(null);
     },
   });
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => requestService.delete(id),
     onSuccess: () => {
@@ -81,7 +75,6 @@ export default function AdminRequestsPage() {
     },
   });
 
-  // Request Type Badge Color
   const getTypeColor = (type: string) => {
     switch (type?.toUpperCase()) {
       case "CONTENT":
@@ -101,14 +94,27 @@ export default function AdminRequestsPage() {
     }
   };
 
+  const renderField = (label: string, value: any, icon?: React.ReactNode) => {
+    if (!value) return null;
+    return (
+      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+        {icon && <div className="text-gray-500 mt-0.5">{icon}</div>}
+        <div className="flex-1">
+          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="font-medium break-words">{String(value)}</p>
+        </div>
+      </div>
+    );
+  };
+
   const columns = [
     {
       key: "sender",
       header: "Sender",
       cell: (item: PublicRequest) => (
         <div>
-          <p className="font-bold">{item.name}</p>
-          <p className="text-xs text-muted-foreground">{item.email}</p>
+          <p className="font-bold">{item.name || "N/A"}</p>
+          <p className="text-xs text-muted-foreground">{item.email || "N/A"}</p>
         </div>
       ),
     },
@@ -117,12 +123,19 @@ export default function AdminRequestsPage() {
       header: "Subject & Type",
       cell: (item: PublicRequest) => (
         <div className="max-w-[200px]">
-          <p className="font-medium truncate" title={item.subject}>
-            {item.subject}
-          </p>
-          <span className={`text-[10px] uppercase px-2 py-0.5 rounded ${getTypeColor(item.requestType)}`}>
-            {item.requestType}
-          </span>
+          <p className="font-medium truncate">{item.subject || "No Subject"}</p>
+          <div className="flex gap-1 mt-1">
+            {item.requestType && (
+              <span className={`text-[10px] uppercase px-2 py-0.5 rounded ${getTypeColor(item.requestType)}`}>
+                {item.requestType}
+              </span>
+            )}
+            {item.contentType && (
+              <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                {item.contentType}
+              </span>
+            )}
+          </div>
         </div>
       ),
     },
@@ -132,7 +145,7 @@ export default function AdminRequestsPage() {
       cell: (item: PublicRequest) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <Clock className="h-3 w-3" />
-          {formatDateEn(item.createdAt || new Date())}
+          {item.createdAt ? formatDateEn(item.createdAt) : "N/A"}
         </div>
       ),
     },
@@ -149,7 +162,6 @@ export default function AdminRequestsPage() {
       className: "text-right",
       cell: (item: PublicRequest) => (
         <div className="flex justify-end gap-1">
-          {/* View Details Button */}
           <Button
             variant="ghost"
             size="icon"
@@ -159,33 +171,31 @@ export default function AdminRequestsPage() {
             <Eye className="h-4 w-4" />
           </Button>
 
-          {/* Status Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" title="Change Status">
                 <CheckCircle className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={() => statusMutation.mutate({ id: item.id, status: "REVIEWING" })}
               >
-                <Clock className="h-4 w-4 mr-2 text-yellow-500" /> Mark as Reviewing
+                <Clock className="h-4 w-4 mr-2 text-yellow-500" /> Reviewing
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => statusMutation.mutate({ id: item.id, status: "COMPLETED" })}
               >
-                <CheckCircle className="h-4 w-4 mr-2 text-green-500" /> Mark as Completed
+                <CheckCircle className="h-4 w-4 mr-2 text-green-500" /> Completed
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => statusMutation.mutate({ id: item.id, status: "REJECTED" })}
               >
-                <XCircle className="h-4 w-4 mr-2 text-red-500" /> Reject Request
+                <XCircle className="h-4 w-4 mr-2 text-red-500" /> Rejected
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Delete Button */}
           <Button
             variant="ghost"
             size="icon"
@@ -223,7 +233,7 @@ export default function AdminRequestsPage() {
         </div>
       )}
 
-      {/* Request Details Modal */}
+      {/* ========== Request Details Modal ========== */}
       <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -234,107 +244,134 @@ export default function AdminRequestsPage() {
           </DialogHeader>
 
           {selectedRequest && (
-            <div className="space-y-6">
-              {/* Status & Type */}
-              <div className="flex items-center gap-3">
+            <div className="space-y-4">
+              {/* Status & Types */}
+              <div className="flex items-center gap-2 flex-wrap">
                 <StatusBadge status={selectedRequest.status?.toLowerCase() as any} />
-                <span className={`text-xs uppercase px-2 py-1 rounded ${getTypeColor(selectedRequest.requestType)}`}>
-                  {selectedRequest.requestType}
-                </span>
+                {selectedRequest.requestType && (
+                  <span className={`text-xs uppercase px-2 py-1 rounded ${getTypeColor(selectedRequest.requestType)}`}>
+                    {selectedRequest.requestType}
+                  </span>
+                )}
+                {selectedRequest.contentType && (
+                  <span className="text-xs uppercase px-2 py-1 rounded bg-gray-100 text-gray-600">
+                    {selectedRequest.contentType}
+                  </span>
+                )}
               </div>
 
               <Separator />
 
-              {/* Sender Info */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+              {/* Sender Information */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                   Sender Information
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <User className="h-5 w-5 text-gray-500" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Name</p>
-                      <p className="font-medium">{selectedRequest.name}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Mail className="h-5 w-5 text-gray-500" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Email</p>
-                      <a
-                        href={`mailto:${selectedRequest.email}`}
-                        className="font-medium text-blue-600 hover:underline"
-                      >
-                        {selectedRequest.email}
-                      </a>
-                    </div>
-                  </div>
-                  {selectedRequest.phone && (
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Phone className="h-5 w-5 text-gray-500" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Phone</p>
-                        <a
-                          href={`tel:${selectedRequest.phone}`}
-                          className="font-medium text-blue-600 hover:underline"
-                        >
-                          {selectedRequest.phone}
-                        </a>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {renderField("Name", selectedRequest.name, <User className="h-4 w-4" />)}
+                  {renderField("Email", selectedRequest.email, <Mail className="h-4 w-4" />)}
+                  {renderField("Phone", selectedRequest.phone, <Phone className="h-4 w-4" />)}
+                  {renderField(
+                    "Received At",
+                    selectedRequest.createdAt ? formatDateEn(selectedRequest.createdAt) : null,
+                    <Calendar className="h-4 w-4" />
                   )}
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Calendar className="h-5 w-5 text-gray-500" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Received At</p>
-                      <p className="font-medium">
-                        {formatDateEn(selectedRequest.createdAt || new Date())}
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
-
-              <Separator />
 
               {/* Subject */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                  Subject
-                </h3>
-                <p className="font-medium text-lg">{selectedRequest.subject}</p>
-              </div>
-
-              <Separator />
-
-              {/* Message */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                  Message
-                </h3>
-                <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-wrap text-gray-700 leading-relaxed">
-                  {selectedRequest.message || "No message provided."}
-                </div>
-              </div>
-
-              {/* Attachment URL if exists */}
-              {selectedRequest.attachmentUrl && (
+              {selectedRequest.subject && (
                 <>
                   <Separator />
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                      Attachment
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      Subject
                     </h3>
-                    <a
-                      href={selectedRequest.attachmentUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
-                    >
-                      <LinkIcon className="h-4 w-4" />
-                      View Attachment
-                    </a>
+                    <p className="font-semibold text-lg">{selectedRequest.subject}</p>
+                  </div>
+                </>
+              )}
+
+              {/* Description */}
+              {selectedRequest.description && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      Description
+                    </h3>
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg whitespace-pre-wrap text-gray-700 leading-relaxed">
+                      {selectedRequest.description}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Reference */}
+              {selectedRequest.reference && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      Reference
+                    </h3>
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-blue-700">{selectedRequest.reference}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Attachment URLs */}
+              {selectedRequest.attachmentUrls && selectedRequest.attachmentUrls.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      Attachments ({selectedRequest.attachmentUrls.length})
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRequest.attachmentUrls.map((url, index) => (
+                        <a
+                          key={index}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition text-sm"
+                        >
+                          <LinkIcon className="h-4 w-4" />
+                          Attachment {index + 1}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Admin Notes & Review Info */}
+              {(selectedRequest.adminNotes || selectedRequest.reviewedBy) && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                      Admin Review
+                    </h3>
+                    <div className="space-y-3">
+                      {selectedRequest.adminNotes && (
+                        <div className="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                          <p className="text-xs text-muted-foreground mb-1">Admin Notes</p>
+                          <p className="text-gray-700">{selectedRequest.adminNotes}</p>
+                        </div>
+                      )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {renderField("Reviewed By", selectedRequest.reviewedBy, <UserCheck className="h-4 w-4" />)}
+                        {renderField(
+                          "Reviewed At",
+                          selectedRequest.reviewedAt ? formatDateEn(selectedRequest.reviewedAt) : null,
+                          <Calendar className="h-4 w-4" />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
@@ -342,54 +379,56 @@ export default function AdminRequestsPage() {
               <Separator />
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => statusMutation.mutate({ id: selectedRequest.id, status: "REVIEWING" })}
-                  disabled={statusMutation.isPending}
-                >
-                  <Clock className="h-4 w-4 mr-2 text-yellow-500" />
-                  Mark as Reviewing
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => statusMutation.mutate({ id: selectedRequest.id, status: "COMPLETED" })}
-                  disabled={statusMutation.isPending}
-                  className="border-green-200 hover:bg-green-50"
-                >
-                  <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                  Mark as Completed
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => statusMutation.mutate({ id: selectedRequest.id, status: "REJECTED" })}
-                  disabled={statusMutation.isPending}
-                  className="border-red-200 hover:bg-red-50"
-                >
-                  <XCircle className="h-4 w-4 mr-2 text-red-500" />
-                  Reject
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    setDeleteId(selectedRequest.id);
-                    setSelectedRequest(null);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                  Actions
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => statusMutation.mutate({ id: selectedRequest.id, status: "REVIEWING" })}
+                    disabled={statusMutation.isPending}
+                    className="border-yellow-200 hover:bg-yellow-50"
+                  >
+                    <Clock className="h-4 w-4 mr-1 text-yellow-500" /> Reviewing
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => statusMutation.mutate({ id: selectedRequest.id, status: "COMPLETED" })}
+                    disabled={statusMutation.isPending}
+                    className="border-green-200 hover:bg-green-50"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1 text-green-500" /> Completed
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => statusMutation.mutate({ id: selectedRequest.id, status: "REJECTED" })}
+                    disabled={statusMutation.isPending}
+                    className="border-red-200 hover:bg-red-50"
+                  >
+                    <XCircle className="h-4 w-4 mr-1 text-red-500" /> Rejected
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => {
+                      setDeleteId(selectedRequest.id);
+                      setSelectedRequest(null);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" /> Delete
+                  </Button>
+                </div>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
+      {/* ========== Delete Confirmation ========== */}
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
