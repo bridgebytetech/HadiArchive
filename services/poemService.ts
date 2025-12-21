@@ -5,7 +5,9 @@ const BASE_URL = '/poems';
 const ADMIN_URL = '/admin/poems';
 
 export const poemService = {
+  // ---------------------
   // Public APIs
+  // ---------------------
   getAll: async (page = 0, size = 20): Promise<PagedResponse<Poem>> => {
     return apiRequest(api.get(`${BASE_URL}?page=${page}&size=${size}`));
   },
@@ -18,9 +20,15 @@ export const poemService = {
     return apiRequest(api.get(`${BASE_URL}/featured?limit=${limit}`));
   },
 
+  // ---------------------
   // Admin APIs
+  // ---------------------
   adminGetAll: async (page = 0, size = 20): Promise<PagedResponse<Poem>> => {
     return apiRequest(api.get(`${ADMIN_URL}?page=${page}&size=${size}`));
+  },
+
+  adminGetById: async (id: string): Promise<Poem> => {
+    return apiRequest(api.get(`${ADMIN_URL}/${id}`));
   },
 
   create: async (data: Partial<Poem>): Promise<Poem> => {
