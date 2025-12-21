@@ -5,7 +5,9 @@ const BASE_URL = '/timeline';
 const ADMIN_URL = '/admin/timeline';
 
 export const timelineService = {
+  // ---------------------
   // Public APIs
+  // ---------------------
   getAll: async (): Promise<TimelineEvent[]> => {
     return apiRequest(api.get(BASE_URL));
   },
@@ -14,7 +16,9 @@ export const timelineService = {
     return apiRequest(api.get(`${BASE_URL}/${id}`));
   },
 
+  // ---------------------
   // Admin APIs
+  // ---------------------
   adminGetAll: async (): Promise<TimelineEvent[]> => {
     return apiRequest(api.get(ADMIN_URL));
   },
