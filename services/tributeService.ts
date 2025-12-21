@@ -5,7 +5,9 @@ const BASE_URL = '/tributes';
 const ADMIN_URL = '/admin/tributes';
 
 export const tributeService = {
+  // ---------------------
   // Public APIs
+  // ---------------------
   getAll: async (page = 0, size = 20): Promise<PagedResponse<Tribute>> => {
     return apiRequest(api.get(`${BASE_URL}?page=${page}&size=${size}`));
   },
@@ -23,7 +25,9 @@ export const tributeService = {
     return apiRequest(api.post(BASE_URL, data));
   },
 
+  // ---------------------
   // Admin APIs
+  // ---------------------
   adminGetAll: async (page = 0, size = 20): Promise<PagedResponse<Tribute>> => {
     return apiRequest(api.get(`${ADMIN_URL}?page=${page}&size=${size}`));
   },
@@ -41,7 +45,8 @@ export const tributeService = {
   },
 
   reject: async (id: string, reason?: string): Promise<Tribute> => {
-    return apiRequest(api.patch(`${ADMIN_URL}/${id}/reject?reason=${reason || ''}`));
+    const query = reason ? `?reason=${encodeURIComponent(reason)}` : '';
+    return apiRequest(api.patch(`${ADMIN_URL}/${id}/reject${query}`));
   },
 
   toggleFeatured: async (id: string): Promise<Tribute> => {
