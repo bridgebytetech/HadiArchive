@@ -20,6 +20,7 @@ import { tributePublicService } from "@/services/publicTributeService";
 import { useLanguage } from "@/hooks/useLanguage";
 import { formatDateEn, formatDate } from "@/lib/utils";
 import { TRIBUTE_TYPES } from "@/lib/constants";
+import { Button } from "@/components/ui/button";
 
 export default function SingleTributePage() {
   const params = useParams();
