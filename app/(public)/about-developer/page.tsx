@@ -306,7 +306,7 @@ export default function AboutDeveloperPage() {
               </h3>
               <p className="text-muted-foreground max-w-xl mx-auto">
                 {t(
-                  "শহীদ ওসমান হাদির পরিবার এবং সকল শুভাকাঙ্ক্ষীদের প্রতি বিশেষ কৃতজ্ঞতা যারা এই প্রজেক্টে তথ্য ও সহযোগিতা প্রদান করেছেন। তাঁর স্মৃতি চিরজাগ্রত থাকুক।",
+                  "শহীদ ওসমান হাদির পরিবার এবং সকল শুভাকাঙ্ক্ষীদের প্রতি বিশেষ কৃতজ্ঞতা যারা এই প্রজেক্টে তথ্য ও সহযোগিতা প্রদান করেছেন। তাঁর স্মৃতি চিরজাগ্রত থাকুক। ",
                   "Special thanks to the family of Shaheed Osman Hadi and all well-wishers who provided information and support for this project. May his memory live forever."
                 )}
               </p>
