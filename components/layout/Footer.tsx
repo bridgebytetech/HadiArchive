@@ -11,7 +11,8 @@ import {
   MapPin,
   Heart,
   ExternalLink,
-  Code
+  Code,
+  Shield
 } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { OSMAN_HADI_INFO, SITE_CONFIG } from "@/lib/constants";
@@ -50,12 +51,19 @@ const socialLinks = [
   { href: "https://youtube.com", icon: Youtube, label: "YouTube" },
 ];
 
-const developerLinks = {
+const developerInfo = {
   name: "Bridge Byte Tech",
-  main: "https://www.bridgebytetech.com",
-  youtube: "https://www.youtube.com/@bridgebytetech",
+  website: "https://www.bridgebytetech.com",
   facebook: "https://www.facebook.com/bridgebytetech",
-  instagram: "https://www.instagram.com/bridgebytetech/",
+  instagram: "https://www.instagram.com/bridgebytetech",
+  youtube: "https://www.youtube.com/@bridgebytetech",
+  linkedin: "https://www.linkedin.com/company/108645484",
+};
+
+const collaboratorInfo = {
+  name: "Dangerous Force",
+  website: "https://www.dangerousforce.com",
+  facebook: "https://www.facebook.com/DangerousForce.Official",
 };
 
 export default function Footer() {
@@ -201,25 +209,93 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
         <div className="container-memorial py-6">
-          <div className="flex flex-col gap-4 text-sm text-white/60">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col gap-6 text-sm">
+            
+            {/* Developer & Collaborator Section */}
+            <div className="flex flex-col lg:flex-row items-center justify-center gap-4 py-4 px-6 bg-white/5 rounded-xl">
+              {/* Developer */}
+              <div className="flex items-center gap-2">
+                <Code className="h-4 w-4 text-memorial-gold" />
+                <span className="text-white/60">
+                  {t("ডেভেলপার:", "Developed by:")}
+                </span>
+                <a
+                  href={developerInfo.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-white hover:text-memorial-gold transition-colors"
+                >
+                  {developerInfo.name}
+                </a>
+                <div className="flex items-center gap-1 ml-2">
+                  <a
+                    href={developerInfo.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-600 transition-colors"
+                    aria-label="Bridge Byte Tech Facebook"
+                  >
+                    <Facebook className="h-3.5 w-3.5" />
+                  </a>
+                  <a
+                    href={developerInfo.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-red-600 transition-colors"
+                    aria-label="Bridge Byte Tech YouTube"
+                  >
+                    <Youtube className="h-3.5 w-3.5" />
+                  </a>
+                  <a
+                    href={developerInfo.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-pink-600 transition-colors"
+                    aria-label="Bridge Byte Tech Instagram"
+                  >
+                    <span className="text-[10px] font-bold">IG</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="hidden lg:block w-px h-6 bg-white/20"></div>
+              <div className="block lg:hidden w-full h-px bg-white/20"></div>
+
+              {/* Collaborator */}
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-red-400" />
+                <span className="text-white/60">
+                  {t("সহযোগী:", "Collaborator:")}
+                </span>
+                <a
+                  href={collaboratorInfo.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-white hover:text-red-400 transition-colors"
+                >
+                  {collaboratorInfo.name}
+                </a>
+                <a
+                  href={collaboratorInfo.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-600 transition-colors ml-2"
+                  aria-label="Dangerous Force Facebook"
+                >
+                  <Facebook className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Copyright & Links */}
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 text-white/60">
               <p className="text-center lg:text-left">
-                © {currentYear}{" "}
-                {t("Bridge Byte Tech", "Bridge Byte Tech")}
-                {" • "}
-                {t("All rights reserved", "All rights reserved")}
+                © {currentYear} {t("Bridge Byte Tech", "Bridge Byte Tech")} • {t("সর্বস্বত্ব সংরক্ষিত", "All rights reserved")}
               </p>
 
-              {/* Developer Credit */}
               <p className="text-center">
-                {t("শহীদ ওসমান হাদির স্মরণে — ", "In memory of Shaheed Osman Hadi — ")}
-                <Link
-                  href="/about-developer"
-                  className="font-medium text-white hover:text-memorial-gold transition-colors underline underline-offset-4"
-                >
-                  {t("Developed by ", "Developed by ")}
-                  {developerLinks.name}
-                </Link>
+                {t("শহীদ ওসমান হাদির স্মরণে", "In memory of Shaheed Osman Hadi")} 🕊️
               </p>
 
               {/* Policy links */}
@@ -237,41 +313,6 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Developer Social Icons */}
-            <div className="flex items-center justify-center lg:justify-end gap-3">
-              <a
-                href={developerLinks.youtube}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-memorial-green transition-colors"
-                aria-label="Bridge Byte Tech YouTube"
-                title="Bridge Byte Tech YouTube"
-              >
-                <Youtube className="h-4 w-4 text-white" />
-              </a>
-
-              <a
-                href={developerLinks.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-memorial-green transition-colors"
-                aria-label="Bridge Byte Tech Facebook"
-                title="Bridge Byte Tech Facebook"
-              >
-                <Facebook className="h-4 w-4 text-white" />
-              </a>
-
-              <a
-                href={developerLinks.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-memorial-green transition-colors"
-                aria-label="Bridge Byte Tech Instagram"
-                title="Bridge Byte Tech Instagram"
-              >
-                <span className="text-[11px] font-semibold text-white">IG</span>
-              </a>
-            </div>
           </div>
         </div>
       </div>
