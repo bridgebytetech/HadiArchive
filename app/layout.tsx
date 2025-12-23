@@ -176,13 +176,15 @@ export const metadata: Metadata = {
   
   manifest: '/site.webmanifest',
   
-  verification: {
-    google: 'your-google-verification-code',
-    yandex: 'your-yandex-verification-code',
-    bing: 'your-bing-verification-code',
-    yahoo: 'your-yahoo-verification-code',
-    facebook: 'your-facebook-verification-code',
+verification: {
+  google: 'your-google-verification-code',
+  yandex: 'your-yandex-verification-code',
+  other: {
+    bing: ['your-bing-verification-code'],
+    yahoo: ['your-yahoo-verification-code'],
+    facebook: ['your-facebook-verification-code'],
   },
+},
   
   category: 'memorial',
   classification: 'Digital Archive',
