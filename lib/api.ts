@@ -2,7 +2,9 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
 
-// ১. এপিআই ইন্সট্যান্স তৈরি
+/**
+ * ১. এপিআই ইন্সট্যান্স তৈরি
+ */
 const api: AxiosInstance = axios.create({
   baseURL: 'https://api.hadiarchive.com/api',
   timeout: 30000,
@@ -14,14 +16,14 @@ const api: AxiosInstance = axios.create({
 
 /**
  * ২. রিকোয়েস্ট ইন্টারসেপ্টর
- * এটি প্রতিটা এপিআই কল করার আগে চেক করবে টোকেন আছে কিনা।
- * কুকি অথবা লোকাল স্টোরেজ—উভয় জায়গা থেকে টোকেন খুঁজি যাতে সেশন না হারায়।
+ * ভিজিটরদের (Public) জন্য এটি টোকেন ছাড়াই কাজ করবে।
+ * এডমিনদের জন্য এটি কুকি বা লোকাল স্টোরেজ থেকে টোকেন নিয়ে অটোমেটিক পাঠাবে।
  */
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     let token = Cookies.get('admin_token');
 
-    // যদি কুকিতে না থাকে, লোকাল স্টোরেজ থেকে খুঁজি (Zustand persist storage)
+    // যদি কুকিতে না থাকে, তবে লোকাল স্টোরেজ (Zustand) থেকে খুঁজি যাতে সেশন না হারায়
     if (!token && typeof window !== 'undefined') {
       try {
         const authStorage = localStorage.getItem('auth-storage');
@@ -30,10 +32,11 @@ api.interceptors.request.use(
           token = parsed?.state?.token || null;
         }
       } catch (e) {
-        console.error('Error reading localStorage:', e);
+        // Parsing error ইগনোর করি
       }
     }
 
+    // শুধুমাত্র টোকেন থাকলে Authorization হেডার যোগ হবে
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -45,18 +48,17 @@ api.interceptors.request.use(
 
 /**
  * ৩. রেসপন্স ইন্টারসেপ্টর
- * এপিআই থেকে ভুল এরর আসলে (যেমন ৪০১) এটি অটোমেটিক লগআউট করে দিবে।
+ * এপিআই থেকে টোকেন এক্সপায়ার এরর (401) আসলে এডমিনকে লগআউট করবে।
  */
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // যদি ৪০১ (Unauthorized) আসে, তার মানে টোকেন ইনভ্যালিড
+    // যদি ৪০১ (Unauthorized) আসে এবং ইউজার এডমিন প্যানেলে থাকে
     if (error.response?.status === 401) {
-      Cookies.remove('admin_token', { path: '/' });
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+        Cookies.remove('admin_token', { path: '/' });
         localStorage.removeItem('auth-storage');
-        // লগইন পেজে রিডাইরেক্ট (যদি আমরা এডমিন সেকশনে থাকি)
-        if (window.location.pathname.startsWith('/admin') && !window.location.pathname.includes('/login')) {
+        if (!window.location.pathname.includes('/login')) {
           window.location.href = '/admin/login';
         }
       }
@@ -69,8 +71,8 @@ export default api;
 
 /**
  * ৪. apiRequest ফাংশন (সবচেয়ে গুরুত্বপূর্ণ)
- * আপনার মেইন পেজের 'TypeError: map is not a function' এররটি এটি ঠিক করবে।
- * এটি ব্যাকএন্ডের { success: true, data: [...] } থেকে শুধু ভেতরের ডাটাটুকু বের করে দিবে।
+ * এটি মেইন পেজের 'TypeError: map is not a function' এররটি ঠিক করবে।
+ * ব্যাকএন্ড থেকে আসা { success: true, data: [...] } থেকে শুধু আসল ডাটাটুকু বের করে দিবে।
  */
 export async function apiRequest<T>(
   promise: Promise<{ data: any }>
@@ -79,16 +81,21 @@ export async function apiRequest<T>(
     const response = await promise;
     const resData = response.data;
 
-    // যদি ব্যাকএন্ড ডাটা success wrappers এর ভেতরে পাঠায়
-    if (resData && resData.success === true && resData.data !== undefined) {
-      return resData.data as T; 
+    // ব্যাকএন্ডের পাঠানো অবজেক্টটি ভেঙ্গে ডাটা অংশটুকু নেওয়া
+    if (resData && typeof resData === 'object' && 'success' in resData) {
+      if (resData.success === true) {
+        return resData.data as T; // শুধু কাজের ডাটা (যেমন অ্যারে) রিটার্ন করবে
+      } else {
+        throw new Error(resData.message || 'API error occurred');
+      }
     }
     
-    // যদি সরাসরি ডাটা আসে (fallback)
+    // যদি ব্যাকএন্ড সরাসরি ডাটা পাঠায় (fallback)
     return resData as T;
   } catch (error: any) {
     // এরর মেসেজ হ্যান্ডেল করা
-    const message = error.response?.data?.message || error.message || 'Something went wrong';
+    const message = error.response?.data?.message || error.message || 'Network Error';
+    console.error("API Request Fail:", message);
     throw new Error(message);
   }
 }
