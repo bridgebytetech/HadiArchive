@@ -1,3 +1,4 @@
+// components/admin/AdminSidebar.tsx
 "use client";
 
 import React from "react";
@@ -7,6 +8,7 @@ import {
   LayoutDashboard,
   Video,
   Image as ImageIcon,
+  Palette,
   Music,
   Mic,
   FileText,
@@ -44,6 +46,7 @@ const navItems = [
   { type: "separator", label: "Content" },
   { href: "/admin/videos", icon: Video, label: "Videos" },
   { href: "/admin/photos", icon: ImageIcon, label: "Photos" },
+  { href: "/admin/posters", icon: Palette, label: "Posters" },
   { href: "/admin/audios", icon: Music, label: "Audios" },
   { href: "/admin/speeches", icon: Mic, label: "Speeches" },
   { href: "/admin/writings", icon: FileText, label: "Writings" },
