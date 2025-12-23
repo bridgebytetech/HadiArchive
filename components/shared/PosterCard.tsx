@@ -14,6 +14,7 @@ const PosterCard: React.FC<PosterCardProps> = ({ poster }) => {
       {/* Image Container */}
       <div className="aspect-[3/4] relative overflow-hidden bg-slate-100 dark:bg-slate-800">
         <Image
+          // যদি ডাটাবেসে imageUrl না থাকে তবে thumbnailUrl নিবে, তাও না থাকলে প্লেসহোল্ডার
           src={poster.imageUrl || poster.thumbnailUrl || "https://placehold.co/400x600?text=No+Image"}
           alt={poster.titleBn || "Poster"}
           fill
@@ -24,7 +25,7 @@ const PosterCard: React.FC<PosterCardProps> = ({ poster }) => {
         />
       </div>
 
-      {/* Info */}
+      {/* Title */}
       <div className="p-3 text-center mt-auto">
         <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-2">
           {poster.titleBn}
