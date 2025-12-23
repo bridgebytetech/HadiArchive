@@ -22,7 +22,6 @@ export default function PhotoGalleryPreview() {
     queryFn: () => photoService.getAll(0, 6),
   });
 
-  // ডাটা এক্সট্রাকশন (Array বা Paginated Object উভয়ই হ্যান্ডেল করবে)
   const photos = data?.content || (Array.isArray(data) ? data : []);
 
   const openLightbox = (index: number) => {
@@ -48,7 +47,7 @@ export default function PhotoGalleryPreview() {
               {t("স্মৃতিতে অমর মুহূর্ত", "Eternal Moments in Memory")}
             </h2>
           </div>
-          <Button asChild variant="ghost" className="group text-memorial-green">
+          <Button asChild variant="ghost" className="group text-memorial-green hover:bg-memorial-green/10">
             <Link href="/photos" className="flex items-center gap-2">
               {t("সব ছবি দেখুন", "View Full Gallery")}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -58,23 +57,36 @@ export default function PhotoGalleryPreview() {
 
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 h-[400px]">
-            {[...Array(4)].map((_, i) => <Skeleton key={i} className="rounded-2xl" />)}
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="rounded-2xl w-full h-full" />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[250px]">
             {photos.map((photo: any, index: number) => {
-              const gridClasses = ["md:col-span-2 md:row-span-2", "md:col-span-1", "md:col-span-1", "md:col-span-2", "md:col-span-1", "md:col-span-1"];
+              const gridClasses = [
+                "md:col-span-2 md:row-span-2", 
+                "md:col-span-1 md:row-span-1",
+                "md:col-span-1 md:row-span-1",
+                "md:col-span-2 md:row-span-1",
+                "md:col-span-1 md:row-span-1",
+                "md:col-span-1 md:row-span-1",
+              ];
+
               return (
                 <button
                   key={photo.id}
                   onClick={() => openLightbox(index)}
-                  className={`group relative overflow-hidden rounded-2xl bg-slate-200 ${gridClasses[index] || ""}`}
+                  className={`group relative overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 transition-all duration-300 hover:shadow-xl ${gridClasses[index] || ""}`}
                 >
                   <Image
                     src={photo.thumbnailUrl || photo.imageUrl}
                     alt={photo.titleBn}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    // ✅ Vercel 402 Error সমাধান করতে এই লাইনটি যোগ করা হয়েছে
+                    unoptimized={true} 
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Maximize2 className="text-white w-8 h-8" />
@@ -86,7 +98,12 @@ export default function PhotoGalleryPreview() {
         )}
       </div>
 
-      <Lightbox open={lightboxOpen} close={() => setLightboxOpen(false)} index={lightboxIndex} slides={lightboxSlides} />
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        index={lightboxIndex}
+        slides={lightboxSlides}
+      />
     </section>
   );
 }
