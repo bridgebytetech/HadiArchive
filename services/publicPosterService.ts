@@ -1,10 +1,9 @@
-// services/publicPosterService.ts
-import api, { apiRequest } from "@/lib/api"; // ✅ apiRequest ইমপোর্ট করুন
+import api, { apiRequest } from "@/lib/api";
 import { Poster, PosterPage } from "./posterService";
 
 export const publicPosterService = {
   getAll: async (page = 0, size = 12): Promise<PosterPage> => {
-    // ✅ সরাসরি return response.data এর বদলে apiRequest ব্যবহার করুন
+    // এখানে apiRequest ব্যবহার করলে {success: true, data: ...} থেকে শুধু ডাটাটুকু বের হবে
     return apiRequest(api.get(`/posters?page=${page}&size=${size}`));
   },
 
@@ -18,9 +17,5 @@ export const publicPosterService = {
 
   getByType: async (type: string, page = 0, size = 12): Promise<PosterPage> => {
     return apiRequest(api.get(`/posters/type/${type}?page=${page}&size=${size}`));
-  },
-
-  trackDownload: async (id: string): Promise<void> => {
-    return apiRequest(api.post(`/posters/${id}/download`));
-  },
+  }
 };
