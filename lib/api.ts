@@ -3,21 +3,23 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'ax
 import Cookies from 'js-cookie';
 import { ApiResponse } from '@/types';
 
-// ✅ Helper function to get token
+// Helper function to get token from cookie or localStorage
 const getToken = (): string | null => {
   // First try cookie
   const cookieToken = Cookies.get('admin_token');
   if (cookieToken) return cookieToken;
   
   // Then try localStorage
-  try {
-    const authStorage = localStorage.getItem('auth-storage');
-    if (authStorage) {
-      const parsed = JSON.parse(authStorage);
-      return parsed?.state?.token || null;
+  if (typeof window !== 'undefined') {
+    try {
+      const authStorage = localStorage.getItem('auth-storage');
+      if (authStorage) {
+        const parsed = JSON.parse(authStorage);
+        return parsed?.state?.token || null;
+      }
+    } catch (e) {
+      console.error('Error reading from localStorage:', e);
     }
-  } catch (e) {
-    console.error('Error reading from localStorage:', e);
   }
   
   return null;
@@ -36,8 +38,6 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getToken();
-    
-    console.log('🔑 Token Check:', token ? `Found: ${token.substring(0, 20)}...` : '❌ NOT FOUND');
     
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -60,11 +60,12 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 || 
         (error.response?.status === 400 && error.response?.data?.message === 'Access Denied')) {
-      // Clear both cookie and localStorage
       Cookies.remove('admin_token', { path: '/' });
-      try {
-        localStorage.removeItem('auth-storage');
-      } catch (e) {}
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem('auth-storage');
+        } catch (e) {}
+      }
       
       if (typeof window !== 'undefined' && 
           window.location.pathname.startsWith('/admin') &&
@@ -78,3 +79,30 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+// ✅ apiRequest function - এটা export করতে হবে
+export async function apiRequest<T>(
+  promise: Promise<{ data: any }>
+): Promise<T> {
+  try {
+    const response = await promise;
+    
+    // Handle different response formats
+    if (response.data?.success === true && response.data?.data !== undefined) {
+      return response.data.data as T;
+    }
+    
+    if (response.data?.success === false) {
+      throw new Error(response.data.message || 'Request failed');
+    }
+    
+    // Direct data return
+    return response.data as T;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const message = error.response?.data?.message || error.message;
+      throw new Error(message);
+    }
+    throw error;
+  }
+}
