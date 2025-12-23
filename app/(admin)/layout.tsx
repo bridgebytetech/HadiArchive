@@ -1,18 +1,31 @@
-import { Metadata } from "next";
+// app/(admin)/admin/layout.tsx
+"use client";
 
-export const metadata: Metadata = {
-  title: "Admin Panel | Shaheed Osman Hadi Memorial",
-  description: "Administrative dashboard for managing memorial content",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+import { useEffect } from 'react';
+import { useAuthStore } from '@/store/authStore';
+import { useRouter, usePathname } from 'next/navigation';
 
-export default function AdminRootLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  const { isAuthenticated, checkAuth, token } = useAuthStore();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Login page বাদে অন্য সব page এ auth check করো
+    if (!pathname.includes('/login')) {
+      checkAuth();
+      
+      // Token না থাকলে login এ redirect
+      if (!isAuthenticated && !token) {
+        console.log('🚪 Not authenticated, redirecting to login');
+        router.push('/admin/login');
+      }
+    }
+  }, [pathname, isAuthenticated, token, checkAuth, router]);
+
+  return <>{children}</>;
 }
