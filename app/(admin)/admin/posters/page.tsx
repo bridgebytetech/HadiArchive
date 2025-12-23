@@ -1,4 +1,4 @@
-// app/admin/posters/page.tsx
+// app/(admin)/admin/posters/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -90,12 +90,14 @@ export default function AdminPostersPage() {
       key: "image",
       header: "Preview",
       cell: (item: Poster) => (
-        <div className="relative w-12 h-16 rounded-md overflow-hidden bg-gray-100 border">
+        <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100 border flex items-center justify-center">
           <Image
             src={item.thumbnailUrl || item.imageUrl}
             alt={item.titleBn}
-            fill
-            className="object-cover"
+            width={0}
+            height={0}
+            sizes="64px"
+            className="w-full h-full object-contain"
           />
         </div>
       ),
