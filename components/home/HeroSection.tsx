@@ -119,7 +119,7 @@ export default function HeroSection() {
           <Button
             asChild
             size="lg"
-            variant="outline"
+            variant="outline-light"
             className="border-white/30 text-white hover:bg-white/10"
           >
             <Link href="/videos" className="flex items-center gap-2">
