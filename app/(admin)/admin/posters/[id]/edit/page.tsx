@@ -1,4 +1,4 @@
-// app/admin/posters/[id]/edit/page.tsx
+// app/(admin)/admin/posters/[id]/edit/page.tsx
 "use client";
 
 import React, { useEffect } from "react";
@@ -141,16 +141,19 @@ export default function EditPosterPage() {
                 <h3 className="font-semibold">Preview</h3>
               </div>
 
-              <div className="relative aspect-[3/4] rounded-lg overflow-hidden border bg-gray-50">
+              <div className="relative w-full rounded-lg overflow-hidden border bg-gray-50 flex items-center justify-center min-h-[200px]">
                 {imageUrl ? (
                   <Image
                     src={thumbUrl || imageUrl}
                     alt="Preview"
-                    fill
-                    className="object-cover"
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    className="w-full h-auto object-contain"
+                    style={{ maxHeight: "400px" }}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">
+                  <div className="w-full py-20 flex items-center justify-center text-sm text-muted-foreground">
                     No image
                   </div>
                 )}
