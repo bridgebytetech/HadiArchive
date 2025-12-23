@@ -10,18 +10,17 @@ const api: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: true, // ✅ CORS এর জন্য
 });
 
-// Request interceptor - Add auth token
+// Request interceptor
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = Cookies.get('admin_token');
     
-    // ✅ Debug log (production এ remove করো)
+    // Debug log
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔑 Token:', token ? 'Found' : 'Missing');
-      console.log('📡 Request URL:', config.url);
+      console.log('📡 API Request:', config.url);
+      console.log('🔑 Token exists:', !!token);
     }
     
     if (token && config.headers) {
@@ -29,34 +28,26 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor - Handle errors
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiResponse<null>>) => {
-    // ✅ Better error logging
-    if (process.env.NODE_ENV === 'development') {
-      console.error('❌ API Error:', {
-        status: error.response?.status,
-        message: error.response?.data?.message || error.message,
-        url: error.config?.url,
-      });
-    }
+    console.error('❌ API Error:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      message: error.response?.data?.message || error.message,
+    });
 
     if (error.response?.status === 401) {
-      Cookies.remove('admin_token');
-      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+      Cookies.remove('admin_token', { path: '/' });
+      if (typeof window !== 'undefined' && 
+          window.location.pathname.startsWith('/admin') &&
+          !window.location.pathname.includes('/login')) {
         window.location.href = '/admin/login';
       }
-    }
-    
-    // ✅ 400 error এর জন্য specific handling
-    if (error.response?.status === 400) {
-      console.error('⚠️ Bad Request - Check if token exists:', !!Cookies.get('admin_token'));
     }
     
     return Promise.reject(error);
@@ -65,16 +56,27 @@ api.interceptors.response.use(
 
 export default api;
 
-// Helper function
+// ✅ Fixed apiRequest function
 export async function apiRequest<T>(
-  promise: Promise<{ data: ApiResponse<T> }>
+  promise: Promise<{ data: any }>
 ): Promise<T> {
   try {
     const response = await promise;
-    if (response.data.success) {
-      return response.data.data;
+    
+    // Debug
+    console.log('📦 API Response:', response.data);
+    
+    // Handle different response formats
+    if (response.data.success === true && response.data.data !== undefined) {
+      return response.data.data as T;
     }
-    throw new Error(response.data.message || 'Something went wrong');
+    
+    if (response.data.success === false) {
+      throw new Error(response.data.message || 'Request failed');
+    }
+    
+    // Direct data return
+    return response.data as T;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const message = error.response?.data?.message || error.message;
