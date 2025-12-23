@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Production-এও যেকোনো ডোমেইন থেকে ইমেজ লোড করার জন্য এই কনফিগারেশন
   images: {
     remotePatterns: [
       {
@@ -14,12 +13,11 @@ const nextConfig = {
     ],
   },
 
-  // API রিকোয়েস্ট ব্যাকএন্ডে পাঠানোর জন্য rewrites কনফিগারেশন
   async rewrites() {
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+        destination: "https://api.hadiarchive.com/api/:path*",  // ✅ সরাসরি URL
       },
     ];
   },
