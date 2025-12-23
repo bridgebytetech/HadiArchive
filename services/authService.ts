@@ -20,7 +20,7 @@ export const authService = {
       let token = null;
       let admin = null;
       let tokenType = 'Bearer';
-      let expiresIn = 604800; // 7 days default
+      let expiresIn = 604800;
       
       if (data.data?.token) {
         token = data.data.token;
@@ -47,7 +47,6 @@ export const authService = {
         throw new Error('Login response এ token নেই');
       }
       
-      // ✅ Full LoginResponse return করছি
       return { 
         token, 
         admin, 
@@ -62,7 +61,6 @@ export const authService = {
 
   logout: () => {
     Cookies.remove('admin_token', { path: '/' });
-    console.log('🚪 Logged out, token removed');
   },
 
   getCurrentAdmin: async (): Promise<Admin> => {
@@ -71,8 +69,6 @@ export const authService = {
   },
 
   isAuthenticated: (): boolean => {
-    const hasToken = !!Cookies.get('admin_token');
-    console.log('🔑 Is Authenticated:', hasToken);
-    return hasToken;
+    return !!Cookies.get('admin_token');
   },
 };
