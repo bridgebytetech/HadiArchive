@@ -1,10 +1,11 @@
+// lib/api.ts
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
 import { ApiResponse } from '@/types';
 
-// Create axios instance with a relative baseURL
+// ✅ সরাসরি Full API URL দিন - Rewrite bypass
 const api: AxiosInstance = axios.create({
-  baseURL: '/api', // এটা /api হবে, full URL না
+  baseURL: 'https://api.hadiarchive.com/api',  // ✅ এখানে পরিবর্তন
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
