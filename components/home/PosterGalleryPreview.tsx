@@ -1,142 +1,66 @@
-// components/home/PosterGalleryPreview.tsx
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Maximize2, Palette } from "lucide-react";
+import { ArrowRight, Palette } from "lucide-material"; // যদি lucide-react হয় তবে lucide-react লিখবেন
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useQuery } from "@tanstack/react-query";
 import { publicPosterService } from "@/services/publicPosterService";
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
+import PosterCard from "@/components/shared/PosterCard";
 
 export default function PosterGalleryPreview() {
-  const { t, language } = useLanguage();
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const { t } = useLanguage();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["featuredPosters"],
-    queryFn: () => publicPosterService.getFeatured(),
+    queryKey: ["previewPostersHome"],
+    queryFn: () => publicPosterService.getAll(0, 6), // হোমপেজের জন্য ৬টি
   });
 
-  const posters = data || [];
-
-  const openLightbox = (index: number) => {
-    setLightboxIndex(index);
-    setLightboxOpen(true);
-  };
-
-  const lightboxSlides = posters.map((poster) => ({
-    src: poster.imageUrl,
-    alt: language === "bn" ? poster.titleBn : poster.titleEn || poster.titleBn,
-  }));
+  // ✅ ডাটা এক্সট্রাকশন লজিক (নিরাপদ রেন্ডারিং)
+  const posters = data?.content || (Array.isArray(data) ? data : []);
 
   return (
-    <section className="py-20 bg-white dark:bg-slate-900/40">
+    <section className="py-24 bg-white dark:bg-slate-950 overflow-hidden">
       <div className="container-memorial">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-memorial-green font-medium tracking-wider uppercase text-sm">
-              <Palette className="w-4 h-4" />
-              <span>{t("সৃজনশীল আর্কাইভ", "Creative Archive")}</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="space-y-3">
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white">
               {t("পোস্টার ও টাইপোগ্রাফি", "Posters & Typography")}
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl">
-              {t(
-                "শহীদ ওসমান হাদির স্মরণে তৈরি পোস্টার ও সৃজনশীল ডিজাইনসমূহ।",
-                "Posters and creative designs in memory of Shaheed Osman Hadi."
-              )}
+            <p className="text-muted-foreground text-lg">
+              {t("শহীদ ওসমান হাদির স্মরণে তৈরি পোস্টারসমূহ।", "Posters dedicated to Shaheed Osman Hadi.")}
             </p>
           </div>
-          <Button
-            asChild
-            variant="ghost"
-            className="group text-memorial-green hover:text-memorial-green hover:bg-memorial-green/10 w-fit"
-          >
+          <Button asChild variant="outline" className="group">
             <Link href="/posters" className="flex items-center gap-2">
-              {t("সব পোস্টার দেখুন", "View All Posters")}
+              {t("সব পোস্টার দেখুন", "View All")}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
         </div>
 
-        {/* Poster Grid - Masonry Style */}
+        {/* Poster Grid */}
         {isLoading ? (
-          <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
             {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-64 rounded-2xl mb-4 break-inside-avoid" />
+              <Skeleton key={i} className="aspect-[3/4] rounded-xl w-full" />
+            ))}
+          </div>
+        ) : posters.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
+            {posters.map((poster: any) => (
+              <PosterCard key={poster.id} poster={poster} />
             ))}
           </div>
         ) : (
-          <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
-            {posters.slice(0, 8).map((poster, index) => (
-              <button
-                key={poster.id}
-                onClick={() => openLightbox(index)}
-                className="group relative w-full overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 transition-all duration-300 hover:shadow-xl break-inside-avoid mb-4"
-              >
-                <Image
-                  src={poster.thumbnailUrl || poster.imageUrl}
-                  alt={language === "bn" ? poster.titleBn : poster.titleEn || poster.titleBn}
-                  width={0}
-                  height={0}
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="w-full h-auto object-contain transition-transform duration-700 ease-out group-hover:scale-105"
-                />
-
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-left">
-                  <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 space-y-1">
-                    <span className="text-white/70 text-[10px] font-medium tracking-widest uppercase">
-                      {t("পোস্টার", "Poster")}
-                    </span>
-                    <h3 className="text-white font-semibold text-sm line-clamp-2">
-                      {language === "bn" ? poster.titleBn : poster.titleEn || poster.titleBn}
-                    </h3>
-                    <div className="flex items-center gap-2 text-memorial-green text-[10px] font-bold">
-                      <Maximize2 className="w-3 h-3" />
-                      {t("বড় করে দেখুন", "VIEW LARGER")}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Badge */}
-                <div className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <Maximize2 className="w-4 h-4 text-white" />
-                </div>
-              </button>
-            ))}
+          <div className="text-center py-10 text-slate-400">
+            {t("কোনো পোস্টার পাওয়া যায়নি", "No posters found.")}
           </div>
         )}
-
-        {/* Mobile CTA */}
-        <div className="mt-10 md:hidden">
-          <Button
-            asChild
-            className="w-full bg-memorial-green hover:bg-memorial-green/90 h-12 rounded-xl shadow-lg shadow-memorial-green/20"
-          >
-            <Link href="/posters">
-              {t("সব পোস্টার দেখুন", "View All Posters")}
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Link>
-          </Button>
-        </div>
       </div>
-
-      <Lightbox
-        open={lightboxOpen}
-        close={() => setLightboxOpen(false)}
-        index={lightboxIndex}
-        slides={lightboxSlides}
-        animation={{ fade: 300 }}
-      />
     </section>
   );
 }
