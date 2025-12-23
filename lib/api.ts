@@ -3,6 +3,26 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'ax
 import Cookies from 'js-cookie';
 import { ApiResponse } from '@/types';
 
+// ✅ Helper function to get token
+const getToken = (): string | null => {
+  // First try cookie
+  const cookieToken = Cookies.get('admin_token');
+  if (cookieToken) return cookieToken;
+  
+  // Then try localStorage
+  try {
+    const authStorage = localStorage.getItem('auth-storage');
+    if (authStorage) {
+      const parsed = JSON.parse(authStorage);
+      return parsed?.state?.token || null;
+    }
+  } catch (e) {
+    console.error('Error reading from localStorage:', e);
+  }
+  
+  return null;
+};
+
 const api: AxiosInstance = axios.create({
   baseURL: 'https://api.hadiarchive.com/api',
   timeout: 30000,
@@ -15,17 +35,14 @@ const api: AxiosInstance = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = Cookies.get('admin_token');
+    const token = getToken();
     
-    // Debug log
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📡 API Request:', config.url);
-      console.log('🔑 Token exists:', !!token);
-    }
+    console.log('🔑 Token Check:', token ? `Found: ${token.substring(0, 20)}...` : '❌ NOT FOUND');
     
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => Promise.reject(error)
@@ -41,8 +58,14 @@ api.interceptors.response.use(
       message: error.response?.data?.message || error.message,
     });
 
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 || 
+        (error.response?.status === 400 && error.response?.data?.message === 'Access Denied')) {
+      // Clear both cookie and localStorage
       Cookies.remove('admin_token', { path: '/' });
+      try {
+        localStorage.removeItem('auth-storage');
+      } catch (e) {}
+      
       if (typeof window !== 'undefined' && 
           window.location.pathname.startsWith('/admin') &&
           !window.location.pathname.includes('/login')) {
@@ -55,33 +78,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
-// ✅ Fixed apiRequest function
-export async function apiRequest<T>(
-  promise: Promise<{ data: any }>
-): Promise<T> {
-  try {
-    const response = await promise;
-    
-    // Debug
-    console.log('📦 API Response:', response.data);
-    
-    // Handle different response formats
-    if (response.data.success === true && response.data.data !== undefined) {
-      return response.data.data as T;
-    }
-    
-    if (response.data.success === false) {
-      throw new Error(response.data.message || 'Request failed');
-    }
-    
-    // Direct data return
-    return response.data as T;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const message = error.response?.data?.message || error.message;
-      throw new Error(message);
-    }
-    throw error;
-  }
-}
