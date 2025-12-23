@@ -35,24 +35,30 @@ export const authService = {
       }
       
       if (token) {
+        // ✅ Cookie settings - Production এ secure: false দিয়ে test করো
         Cookies.set('admin_token', token, { 
-          expires: 7, 
+          expires: 7,
           path: '/',
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax'
+          // ✅ এই দুইটা line change করো
+          secure: false,  // Production এও false রাখো আপাতত
+          sameSite: 'lax',
+          // domain না দিলে current domain এ save হবে
         });
-        console.log('✅ Token saved to cookie');
+        
+        // ✅ Verify cookie saved হলো কিনা
+        const savedToken = Cookies.get('admin_token');
+        console.log('✅ Token saved:', savedToken ? 'YES' : 'NO');
+        console.log('🍪 Cookie value:', savedToken?.substring(0, 30) + '...');
+        
+        if (!savedToken) {
+          console.error('❌ Cookie save failed!');
+        }
       } else {
         console.error('❌ No token in response');
         throw new Error('Login response এ token নেই');
       }
       
-      return { 
-        token, 
-        admin, 
-        tokenType, 
-        expiresIn 
-      };
+      return { token, admin, tokenType, expiresIn };
     } catch (error: any) {
       console.error('❌ Login Error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.message || 'Login failed');
