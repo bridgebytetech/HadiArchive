@@ -1,179 +1,228 @@
-// app/posters/page.tsx
+// app/admin/posters/page.tsx
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
-import { Palette, Maximize2, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useLanguage } from "@/hooks/useLanguage";
-import { publicPosterService } from "@/services/publicPosterService";
+  Edit,
+  Trash2,
+  MoreVertical,
+  Palette,
+  Eye,
+  EyeOff,
+  Star,
+} from "lucide-react";
+import {
+  AdminLayout,
+  AdminPageHeader,
+  DataTable,
+  StatusBadge,
+  ConfirmDialog,
+  Pagination,
+} from "@/components/admin";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { posterService, Poster } from "@/services/posterService";
 import { POSTER_TYPES } from "@/lib/constants";
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
+import { toast } from "sonner";
+import Image from "next/image";
 
-export default function PostersPage() {
-  const { t, language } = useLanguage();
+export default function AdminPostersPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
-  const [selectedType, setSelectedType] = useState<string>("ALL");
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["posters", page, selectedType],
-    queryFn: () =>
-      selectedType === "ALL"
-        ? publicPosterService.getAll(page, 12)
-        : publicPosterService.getByType(selectedType, page, 12),
+    queryKey: ["adminPosters", page],
+    queryFn: () => posterService.getAll(page, 12),
   });
 
-  const posters = data?.content || [];
+  const deleteMutation = useMutation({
+    mutationFn: posterService.delete,
+    onSuccess: () => {
+      toast.success("Poster deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["adminPosters"] });
+      setDeleteId(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete poster");
+    },
+  });
 
-  const openLightbox = (index: number) => {
-    setLightboxIndex(index);
-    setLightboxOpen(true);
+  const togglePublishMutation = useMutation({
+    mutationFn: posterService.togglePublish,
+    onSuccess: () => {
+      toast.success("Poster status updated");
+      queryClient.invalidateQueries({ queryKey: ["adminPosters"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update status");
+    },
+  });
+
+  const toggleFeaturedMutation = useMutation({
+    mutationFn: posterService.toggleFeatured,
+    onSuccess: () => {
+      toast.success("Featured status updated");
+      queryClient.invalidateQueries({ queryKey: ["adminPosters"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update featured status");
+    },
+  });
+
+  const getTypeLabel = (type: string) => {
+    const found = POSTER_TYPES.find((t) => t.value === type);
+    return found?.labelEn || type;
   };
 
-  const lightboxSlides = posters.map((poster) => ({
-    src: poster.imageUrl,
-    alt: language === "bn" ? poster.titleBn : poster.titleEn || poster.titleBn,
-  }));
+  const columns = [
+    {
+      key: "image",
+      header: "Preview",
+      cell: (item: Poster) => (
+        <div className="relative w-12 h-16 rounded-md overflow-hidden bg-gray-100 border">
+          <Image
+            src={item.thumbnailUrl || item.imageUrl}
+            alt={item.titleBn}
+            fill
+            className="object-cover"
+          />
+        </div>
+      ),
+    },
+    {
+      key: "info",
+      header: "Details",
+      cell: (item: Poster) => (
+        <div className="space-y-1">
+          <p className="font-medium truncate max-w-[200px]">{item.titleBn}</p>
+          {item.titleEn && (
+            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+              {item.titleEn}
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "type",
+      header: "Type",
+      cell: (item: Poster) => (
+        <Badge variant="outline" className="text-xs">
+          <Palette className="w-3 h-3 mr-1" />
+          {getTypeLabel(item.posterType)}
+        </Badge>
+      ),
+    },
+    {
+      key: "featured",
+      header: "Featured",
+      cell: (item: Poster) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => toggleFeaturedMutation.mutate(item.id)}
+          className={item.featured ? "text-yellow-500" : "text-gray-400"}
+        >
+          <Star className={`h-4 w-4 ${item.featured ? "fill-current" : ""}`} />
+        </Button>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (item: Poster) => <StatusBadge status={item.published} />,
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      className: "text-right",
+      cell: (item: Poster) => (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => router.push(`/admin/posters/${item.id}/edit`)}
+              >
+                <Edit className="h-4 w-4 mr-2" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => togglePublishMutation.mutate(item.id)}
+              >
+                {item.published ? (
+                  <>
+                    <EyeOff className="h-4 w-4 mr-2" /> Unpublish
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4 mr-2" /> Publish
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setDeleteId(item.id)}
+                className="text-red-600 focus:text-red-600"
+              >
+                <Trash2 className="h-4 w-4 mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-800 border-b">
-        <div className="container-memorial py-12">
-          <div className="flex items-center gap-2 text-memorial-green font-medium tracking-wider uppercase text-sm mb-2">
-            <Palette className="w-4 h-4" />
-            <span>{t("সৃজনশীল আর্কাইভ", "Creative Archive")}</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-4">
-            {t("পোস্টার গ্যালারি", "Poster Gallery")}
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl">
-            {t(
-              "শহীদ ওসমান হাদির স্মরণে তৈরি পোস্টার, টাইপোগ্রাফি ও সৃজনশীল ডিজাইনসমূহ।",
-              "Posters, typography and creative designs in memory of Shaheed Osman Hadi."
-            )}
-          </p>
-        </div>
-      </div>
-
-      {/* Filter */}
-      <div className="container-memorial py-6">
-        <div className="flex items-center gap-4">
-          <Filter className="w-4 h-4 text-muted-foreground" />
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder={t("সব ধরন", "All Types")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">{t("সব ধরন", "All Types")}</SelectItem>
-              {POSTER_TYPES.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {language === "bn" ? type.labelBn : type.labelEn}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Grid */}
-      <div className="container-memorial pb-12">
-        {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(12)].map((_, i) => (
-              <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
-            ))}
-          </div>
-        ) : posters.length === 0 ? (
-          <div className="text-center py-20">
-            <Palette className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">
-              {t("কোনো পোস্টার পাওয়া যায়নি", "No posters found")}
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {posters.map((poster, index) => (
-                <button
-                  key={poster.id}
-                  onClick={() => openLightbox(index)}
-                  className="group relative overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-[3/4] transition-all duration-300 hover:shadow-xl"
-                >
-                  <Image
-                    src={poster.thumbnailUrl || poster.imageUrl}
-                    alt={language === "bn" ? poster.titleBn : poster.titleEn || poster.titleBn}
-                    fill
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-left">
-                    <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 space-y-1">
-                      <h3 className="text-white font-semibold text-sm line-clamp-2">
-                        {language === "bn" ? poster.titleBn : poster.titleEn || poster.titleBn}
-                      </h3>
-                      <div className="flex items-center gap-2 text-memorial-green text-[10px] font-bold">
-                        <Maximize2 className="w-3 h-3" />
-                        {t("বড় করে দেখুন", "VIEW LARGER")}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Badge */}
-                  <div className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <Maximize2 className="w-4 h-4 text-white" />
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {data && data.totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-8">
-                <Button
-                  variant="outline"
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  disabled={page === 0}
-                >
-                  {t("আগের", "Previous")}
-                </Button>
-                <span className="flex items-center px-4 text-sm text-muted-foreground">
-                  {page + 1} / {data.totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={data.last}
-                >
-                  {t("পরের", "Next")}
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      <Lightbox
-        open={lightboxOpen}
-        close={() => setLightboxOpen(false)}
-        index={lightboxIndex}
-        slides={lightboxSlides}
-        animation={{ fade: 300 }}
+    <AdminLayout>
+      <AdminPageHeader
+        title="Posters & Graphics"
+        description="Manage posters, typography, and edited content"
+        actionLabel="Add Poster"
+        actionHref="/admin/posters/new"
       />
-    </div>
+
+      <DataTable
+        columns={columns}
+        data={data?.content || []}
+        isLoading={isLoading}
+      />
+
+      {data && data.totalPages > 1 && (
+        <div className="mt-6">
+          <Pagination
+            currentPage={page + 1}
+            totalPages={data.totalPages}
+            onPageChange={(p) => setPage(p - 1)}
+          />
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        title="Delete Poster"
+        description="Are you sure you want to delete this poster? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
+      />
+    </AdminLayout>
   );
 }
