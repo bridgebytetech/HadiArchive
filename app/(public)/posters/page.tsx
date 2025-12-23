@@ -1,10 +1,10 @@
-// app/posters/page.tsx
+// app/(public)/posters/page.tsx
 "use client";
 
 import React, { useState } from "react";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
-import { Palette, Maximize2, Filter } from "lucide-react";
+import { Palette, Maximize2, Filter, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -31,8 +31,8 @@ export default function PostersPage() {
     queryKey: ["posters", page, selectedType],
     queryFn: () =>
       selectedType === "ALL"
-        ? publicPosterService.getAll(page, 12)
-        : publicPosterService.getByType(selectedType, page, 12),
+        ? publicPosterService.getAll(page, 20)
+        : publicPosterService.getByType(selectedType, page, 20),
   });
 
   const posters = data?.content || [];
@@ -40,6 +40,16 @@ export default function PostersPage() {
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
     setLightboxOpen(true);
+  };
+
+  const handleDownload = async (id: string, imageUrl: string) => {
+    try {
+      await publicPosterService.trackDownload(id);
+      window.open(imageUrl, "_blank");
+    } catch (error) {
+      console.error("Download tracking failed:", error);
+      window.open(imageUrl, "_blank");
+    }
   };
 
   const lightboxSlides = posters.map((poster) => ({
@@ -51,7 +61,7 @@ export default function PostersPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
       <div className="bg-white dark:bg-slate-800 border-b">
-        <div className="container-memorial py-12">
+        <div className="container mx-auto px-4 py-12">
           <div className="flex items-center gap-2 text-memorial-green font-medium tracking-wider uppercase text-sm mb-2">
             <Palette className="w-4 h-4" />
             <span>{t("সৃজনশীল আর্কাইভ", "Creative Archive")}</span>
@@ -69,10 +79,10 @@ export default function PostersPage() {
       </div>
 
       {/* Filter */}
-      <div className="container-memorial py-6">
+      <div className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-4">
           <Filter className="w-4 h-4 text-muted-foreground" />
-          <Select value={selectedType} onValueChange={setSelectedType}>
+          <Select value={selectedType} onValueChange={(val) => { setSelectedType(val); setPage(0); }}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder={t("সব ধরন", "All Types")} />
             </SelectTrigger>
@@ -88,12 +98,12 @@ export default function PostersPage() {
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="container-memorial pb-12">
+      {/* Masonry Grid */}
+      <div className="container mx-auto px-4 pb-12">
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(12)].map((_, i) => (
-              <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+          <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
+            {[...Array(15)].map((_, i) => (
+              <Skeleton key={i} className="h-48 md:h-64 rounded-2xl mb-4 break-inside-avoid" />
             ))}
           </div>
         ) : posters.length === 0 ? (
@@ -105,39 +115,53 @@ export default function PostersPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
               {posters.map((poster, index) => (
-                <button
+                <div
                   key={poster.id}
-                  onClick={() => openLightbox(index)}
-                  className="group relative overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-[3/4] transition-all duration-300 hover:shadow-xl"
+                  className="group relative w-full overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 transition-all duration-300 hover:shadow-xl break-inside-avoid mb-4"
                 >
-                  <Image
-                    src={poster.thumbnailUrl || poster.imageUrl}
-                    alt={language === "bn" ? poster.titleBn : poster.titleEn || poster.titleBn}
-                    fill
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
+                  <button onClick={() => openLightbox(index)} className="w-full">
+                    <Image
+                      src={poster.thumbnailUrl || poster.imageUrl}
+                      alt={language === "bn" ? poster.titleBn : poster.titleEn || poster.titleBn}
+                      width={0}
+                      height={0}
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                      className="w-full h-auto object-contain transition-transform duration-700 ease-out group-hover:scale-105"
+                    />
+                  </button>
 
                   {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-left">
-                    <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 space-y-1">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
+                    <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 space-y-2">
                       <h3 className="text-white font-semibold text-sm line-clamp-2">
                         {language === "bn" ? poster.titleBn : poster.titleEn || poster.titleBn}
                       </h3>
-                      <div className="flex items-center gap-2 text-memorial-green text-[10px] font-bold">
-                        <Maximize2 className="w-3 h-3" />
-                        {t("বড় করে দেখুন", "VIEW LARGER")}
+                      <div className="flex items-center gap-3 pointer-events-auto">
+                        <button
+                          onClick={() => openLightbox(index)}
+                          className="flex items-center gap-1 text-memorial-green text-xs font-bold hover:underline"
+                        >
+                          <Maximize2 className="w-3 h-3" />
+                          {t("দেখুন", "View")}
+                        </button>
+                        <button
+                          onClick={() => handleDownload(poster.id, poster.imageUrl)}
+                          className="flex items-center gap-1 text-white/80 text-xs font-bold hover:text-white"
+                        >
+                          <Download className="w-3 h-3" />
+                          {t("ডাউনলোড", "Download")}
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Badge */}
+                  {/* View Icon */}
                   <div className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <Maximize2 className="w-4 h-4 text-white" />
                   </div>
-                </button>
+                </div>
               ))}
             </div>
 
