@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 // Wikipedia-worthy metadata configuration
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.hadiarchive.com'),
+  metadataBase: new URL("https://hadiarchive.com"),
   title: {
     default: "Shaheed Osman Hadi Memorial Archive - Official Digital Repository | শহীদ শরীফ ওসমান বিন হাদি স্মৃতি সংগ্রহশালা",
     template: "%s - Shaheed Osman Hadi Official Archive",
