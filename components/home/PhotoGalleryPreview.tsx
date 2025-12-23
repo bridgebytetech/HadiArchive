@@ -1,89 +1,92 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Palette } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Maximize2, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useQuery } from "@tanstack/react-query";
-import { publicPosterService } from "@/services/publicPosterService";
-import PosterCard from "@/components/shared/PosterCard";
+import { photoService } from "@/services/photoService";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
-export default function PosterGalleryPreview() {
-  const { t } = useLanguage();
+export default function PhotoGalleryPreview() {
+  const { t, language } = useLanguage();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["previewPostersHome"],
-    // আমরা হোমপেজের জন্য প্রথম ৬টি পোস্টার নিচ্ছি
-    queryFn: () => publicPosterService.getAll(0, 6),
+  const { data, isLoading } = useQuery({
+    queryKey: ["previewPhotos"],
+    queryFn: () => photoService.getAll(0, 6),
   });
 
-  /**
-   * ✅ ডাটা এক্সট্রাকশন ফিক্স:
-   * ১. যদি ডাটা পেজিনেটেড হয়, তবে ডাটা আসবে data.content এ।
-   * ২. যদি সরাসরি এপিআই অ্যারে পাঠায়, তবে ডাটা হবে সরাসরি data।
-   */
-  const posters = data?.content || (Array.isArray(data) ? data : []);
+  // ডাটা এক্সট্রাকশন (Array বা Paginated Object উভয়ই হ্যান্ডেল করবে)
+  const photos = data?.content || (Array.isArray(data) ? data : []);
 
-  // কনসোলে চেক করার জন্য (প্রয়োজনে এটি ডিলিট করতে পারেন)
-  console.log("Home Posters Data:", posters);
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const lightboxSlides = photos.map((photo: any) => ({
+    src: photo.imageUrl,
+    alt: language === "bn" ? photo.titleBn : photo.titleEn || photo.titleBn,
+  }));
 
   return (
-    <section className="py-24 bg-white dark:bg-slate-950 overflow-hidden">
+    <section className="py-20 bg-slate-50/50 dark:bg-slate-900/20">
       <div className="container-memorial">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-memorial-gold font-bold tracking-widest uppercase text-xs">
-              <Palette className="w-4 h-4" />
-              <span>{t("সৃজনশীল আর্কাইভ", "Creative Archive")}</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-memorial-green font-medium tracking-wider uppercase text-sm">
+              <Camera className="w-4 h-4" />
+              <span>{t("ভিজ্যুয়াল আর্কাইভ", "Visual Archive")}</span>
             </div>
-            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-              {t("পোস্টার ও টাইপোগ্রাফি", "Posters & Typography")}
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
+              {t("স্মৃতিতে অমর মুহূর্ত", "Eternal Moments in Memory")}
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl">
-              {t(
-                "শহীদ ওসমান হাদির স্মরণে তৈরি পোস্টার ও সৃজনশীল ডিজাইনসমূহ।",
-                "Creative posters and designs dedicated to Shaheed Osman Hadi."
-              )}
-            </p>
           </div>
-          <Button asChild variant="outline" className="group border-2 hover:bg-slate-50">
-            <Link href="/posters" className="flex items-center gap-2">
-              {t("সব পোস্টার দেখুন", "View All Posters")}
+          <Button asChild variant="ghost" className="group text-memorial-green">
+            <Link href="/photos" className="flex items-center gap-2">
+              {t("সব ছবি দেখুন", "View Full Gallery")}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
         </div>
 
-        {/* Grid Display */}
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="space-y-3">
-                <Skeleton className="aspect-[3/4] w-full rounded-xl" />
-                <Skeleton className="h-4 w-3/4 mx-auto" />
-              </div>
-            ))}
-          </div>
-        ) : posters.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {posters.map((poster: any) => (
-              <div key={poster.id} className="transition-all duration-500 hover:scale-105">
-                <PosterCard poster={poster} />
-              </div>
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 h-[400px]">
+            {[...Array(4)].map((_, i) => <Skeleton key={i} className="rounded-2xl" />)}
           </div>
         ) : (
-          /* যদি কোনো ডাটা না থাকে */
-          <div className="text-center py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-             <p className="text-slate-400 font-medium">
-               {t("কোনো পোস্টার পাওয়া যায়নি", "No posters available at the moment.")}
-             </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[250px]">
+            {photos.map((photo: any, index: number) => {
+              const gridClasses = ["md:col-span-2 md:row-span-2", "md:col-span-1", "md:col-span-1", "md:col-span-2", "md:col-span-1", "md:col-span-1"];
+              return (
+                <button
+                  key={photo.id}
+                  onClick={() => openLightbox(index)}
+                  className={`group relative overflow-hidden rounded-2xl bg-slate-200 ${gridClasses[index] || ""}`}
+                >
+                  <Image
+                    src={photo.thumbnailUrl || photo.imageUrl}
+                    alt={photo.titleBn}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Maximize2 className="text-white w-8 h-8" />
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
+
+      <Lightbox open={lightboxOpen} close={() => setLightboxOpen(false)} index={lightboxIndex} slides={lightboxSlides} />
     </section>
   );
 }
