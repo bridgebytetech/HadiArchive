@@ -1,5 +1,5 @@
 import api, { apiRequest } from "@/lib/api";
-import { PagedResponse, Video } from "@/types";
+import { Video, PagedResponse } from "@/types";
 
 export const publicVideoService = {
   getAll: (page = 0, size = 12): Promise<PagedResponse<Video>> =>
