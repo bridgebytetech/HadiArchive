@@ -16,6 +16,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         memorial: "bg-memorial-green text-white hover:bg-memorial-green/90",
         danger: "bg-memorial-red text-white hover:bg-memorial-red/90",
+         "outline-light": "border border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white",
       },
       size: {
         default: "h-10 px-4 py-2",
