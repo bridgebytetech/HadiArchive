@@ -49,7 +49,6 @@ export interface PosterPage {
   last: boolean;
 }
 
-// Admin Poster Service
 export const posterService = {
   getAll: async (page = 0, size = 12): Promise<PosterPage> => {
     const response = await api.get(`/admin/posters?page=${page}&size=${size}`);
