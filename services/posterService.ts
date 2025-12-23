@@ -84,9 +84,4 @@ export const posterService = {
     const response = await api.patch(`/admin/posters/${id}/feature`);
     return response.data;
   },
-
-  getStats: async (): Promise<any> => {
-    const response = await api.get(`/admin/posters/stats`);
-    return response.data;
-  },
 };
