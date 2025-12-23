@@ -3,8 +3,9 @@ import api, { apiRequest } from "@/lib/api";
 import { Poster, PosterPage, PosterRequest } from "@/types";
 
 export const posterService = {
-  // 🌏 পাবলিক এপিআই (মেইন পেজের জন্য)
+  // 🌏 Public Methods (মেইন পেজের জন্য - /api/posters)
   getPublicPosters: async (page = 0, size = 6): Promise<PosterPage> => {
+    // এখানে /admin নেই, এটি পাবলিক এপিআই কল করবে
     return apiRequest(api.get(`/posters?page=${page}&size=${size}`));
   },
 
@@ -12,7 +13,7 @@ export const posterService = {
     return apiRequest(api.get(`/posters/featured`));
   },
 
-  // 🔐 এডমিন এপিআই (এডমিন প্যানেলের জন্য)
+  // 🔐 Admin Methods (এডমিন প্যানেলের জন্য - /api/admin/posters)
   getAll: async (page = 0, size = 12): Promise<PosterPage> => {
     return apiRequest(api.get(`/admin/posters?page=${page}&size=${size}`));
   },
