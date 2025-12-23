@@ -64,6 +64,15 @@ export const PHOTO_TYPES = [
   { value: "OTHER", labelBn: "অন্যান্য", labelEn: "Other" },
 ];
 
+export const POSTER_TYPES = [
+  { value: "POSTER", labelBn: "পোস্টার", labelEn: "Poster" },
+  { value: "TYPOGRAPHY", labelBn: "টাইপোগ্রাফি", labelEn: "Typography" },
+  { value: "EDITED", labelBn: "এডিটেড", labelEn: "Edited" },
+  { value: "BANNER", labelBn: "ব্যানার", labelEn: "Banner" },
+  { value: "SOCIAL_MEDIA", labelBn: "সোশ্যাল মিডিয়া", labelEn: "Social Media" },
+];
+
+
 export const EVENT_TYPES = [
   { value: "JANAZA", labelBn: "জানাযা", labelEn: "Janaza" },
   { value: "BURIAL", labelBn: "দাফন", labelEn: "Burial" },
