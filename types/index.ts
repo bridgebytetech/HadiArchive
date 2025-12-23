@@ -475,6 +475,8 @@ export interface TributeRequest {
   mediaUrls?: string[];
 }
 
+
+
 export interface PublicRequestForm {
   requestType: string;
   contentType?: string;
@@ -485,4 +487,19 @@ export interface PublicRequestForm {
   description: string;
   reference?: string;
   attachmentUrls?: string[];
+}
+
+// types/index.ts এর শেষে যোগ করুন
+export interface TimelineItem {
+  id: string;
+  date: string;
+  titleBn: string;
+  titleEn?: string;
+  descriptionBn: string;
+  descriptionEn?: string;
+  locationBn?: string;
+  locationEn?: string;
+  imageUrls?: string[];
+  type: string;
+  published: boolean;
 }
