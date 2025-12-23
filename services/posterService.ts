@@ -1,7 +1,9 @@
 // services/posterService.ts
 import api, { apiRequest } from "@/lib/api";
 
-// ✅ অবশ্যই 'export' কি-ওয়ার্ড থাকতে হবে
+/**
+ * ১. Poster Interface (অবশ্যই export করতে হবে)
+ */
 export interface Poster {
   id: string;
   titleBn: string;
@@ -24,6 +26,9 @@ export interface Poster {
   updatedAt: string;
 }
 
+/**
+ * ২. Request Interface
+ */
 export interface PosterRequest {
   titleBn: string;
   titleEn?: string;
@@ -40,6 +45,9 @@ export interface PosterRequest {
   published?: boolean;
 }
 
+/**
+ * ৩. Pagination Interface
+ */
 export interface PosterPage {
   content: Poster[];
   totalElements: number;
@@ -50,17 +58,34 @@ export interface PosterPage {
   last: boolean;
 }
 
+/**
+ * ৪. Poster Service Object
+ */
 export const posterService = {
-  // 🌏 Public APIs (মেইন পেজের জন্য)
+  // 🌏 পাবলিক এপিআই (মেইন পেজ ও গ্যালারির জন্য)
+  // এটি কল করে: /api/posters
   getPublicPosters: async (page = 0, size = 12): Promise<PosterPage> => {
     return apiRequest(api.get(`/posters?page=${page}&size=${size}`));
+  },
+
+  getByIdPublic: async (id: string): Promise<Poster> => {
+    return apiRequest(api.get(`/posters/${id}`));
   },
 
   getFeatured: async (): Promise<Poster[]> => {
     return apiRequest(api.get(`/posters/featured`));
   },
 
-  // 🔐 Admin APIs (এডমিন প্যানেলের জন্য)
+  getByTypePublic: async (type: string, page = 0, size = 12): Promise<PosterPage> => {
+    return apiRequest(api.get(`/posters/type/${type}?page=${page}&size=${size}`));
+  },
+
+  trackDownload: async (id: string): Promise<void> => {
+    return apiRequest(api.post(`/posters/${id}/download`));
+  },
+
+  // 🔐 এডমিন এপিআই (শুধুমাত্র এডমিন প্যানেলের জন্য)
+  // এটি কল করে: /api/admin/posters
   getAll: async (page = 0, size = 12): Promise<PosterPage> => {
     return apiRequest(api.get(`/admin/posters?page=${page}&size=${size}`));
   },
