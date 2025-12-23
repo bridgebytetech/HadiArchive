@@ -27,9 +27,4 @@ export const publicPosterService = {
   trackDownload: async (id: string): Promise<void> => {
     await api.post(`/posters/${id}/download`);
   },
-
-  getTypes: async (): Promise<Record<string, string>> => {
-    const response = await api.get(`/posters/types`);
-    return response.data;
-  },
 };
