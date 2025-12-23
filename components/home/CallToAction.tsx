@@ -49,7 +49,7 @@ export default function CallToAction() {
             <Button
               asChild
               size="lg"
-              variant="outline"
+              variant="outline-light"
               className="border-white/30 text-white hover:bg-white/10"
             >
               <Link href="/contact">
