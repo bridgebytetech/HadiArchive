@@ -8,34 +8,30 @@ const AUTH_URL = '/auth';
 export const authService = {
   login: async (credentials: { username: string; password: string }): Promise<LoginResponse> => {
     try {
-      // ✅ সরাসরি api.post ব্যবহার করো - apiRequest নয়
       const response = await api.post(`${AUTH_URL}/login`, {
         username: credentials.username,
         password: credentials.password
       });
       
-      // ✅ Debug log
       console.log('🔐 Login Response:', response.data);
       
-      // ✅ Response structure check করো
       const data = response.data;
-      
-      // Backend response format অনুযায়ী adjust করো
-      // Format 1: { success: true, data: { token: "...", admin: {...} } }
-      // Format 2: { token: "...", admin: {...} }
-      // Format 3: { success: true, token: "...", admin: {...} }
       
       let token = null;
       let admin = null;
+      let tokenType = 'Bearer';
+      let expiresIn = 604800; // 7 days default
       
       if (data.data?.token) {
-        // Format 1
         token = data.data.token;
         admin = data.data.admin;
+        tokenType = data.data.tokenType || 'Bearer';
+        expiresIn = data.data.expiresIn || 604800;
       } else if (data.token) {
-        // Format 2 or 3
         token = data.token;
         admin = data.admin;
+        tokenType = data.tokenType || 'Bearer';
+        expiresIn = data.expiresIn || 604800;
       }
       
       if (token) {
@@ -51,7 +47,13 @@ export const authService = {
         throw new Error('Login response এ token নেই');
       }
       
-      return { token, admin };
+      // ✅ Full LoginResponse return করছি
+      return { 
+        token, 
+        admin, 
+        tokenType, 
+        expiresIn 
+      };
     } catch (error: any) {
       console.error('❌ Login Error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.message || 'Login failed');
