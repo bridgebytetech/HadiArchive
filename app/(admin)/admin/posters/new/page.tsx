@@ -1,4 +1,4 @@
-// app/admin/posters/new/page.tsx
+// app/(admin)/admin/posters/new/page.tsx
 "use client";
 
 import React from "react";
@@ -104,16 +104,19 @@ export default function NewPosterPage() {
                 <h3 className="font-semibold">Preview</h3>
               </div>
 
-              <div className="relative aspect-[3/4] rounded-lg overflow-hidden border bg-gray-50">
+              <div className="relative w-full rounded-lg overflow-hidden border bg-gray-50 flex items-center justify-center min-h-[200px]">
                 {imageUrl ? (
                   <Image
                     src={thumbUrl || imageUrl}
                     alt="Preview"
-                    fill
-                    className="object-cover"
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    className="w-full h-auto object-contain"
+                    style={{ maxHeight: "400px" }}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-sm text-muted-foreground gap-2">
+                  <div className="w-full py-20 flex flex-col items-center justify-center text-sm text-muted-foreground gap-2">
                     <Palette className="w-8 h-8" />
                     <span>Paste URL to preview</span>
                   </div>
@@ -129,7 +132,7 @@ export default function NewPosterPage() {
               )}
 
               <p className="text-xs text-muted-foreground text-center">
-                Recommended: 1080×1350px or 3:4 ratio
+                Any size supported - will display as uploaded
               </p>
             </CardContent>
           </Card>
@@ -143,7 +146,7 @@ export default function NewPosterPage() {
                   <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
                     Basic Info
                   </h4>
-                  
+
                   <div className="space-y-2">
                     <Label>Title (Bangla) *</Label>
                     <Input {...register("titleBn")} placeholder="পোস্টারের শিরোনাম" />
