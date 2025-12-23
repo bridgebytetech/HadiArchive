@@ -1,4 +1,3 @@
-// app/(admin)/admin/posters/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -41,11 +40,13 @@ export default function AdminPostersPage() {
   const [page, setPage] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // ডাটা ফেচিং
   const { data, isLoading } = useQuery({
     queryKey: ["adminPosters", page],
     queryFn: () => posterService.getAll(page, 12),
   });
 
+  // ডিলিট মিউটেশন
   const deleteMutation = useMutation({
     mutationFn: posterService.delete,
     onSuccess: () => {
@@ -58,6 +59,7 @@ export default function AdminPostersPage() {
     },
   });
 
+  // পাবলিশ স্ট্যাটাস পরিবর্তন
   const togglePublishMutation = useMutation({
     mutationFn: posterService.togglePublish,
     onSuccess: () => {
@@ -69,6 +71,7 @@ export default function AdminPostersPage() {
     },
   });
 
+  // ফিচারড স্ট্যাটাস পরিবর্তন
   const toggleFeaturedMutation = useMutation({
     mutationFn: posterService.toggleFeatured,
     onSuccess: () => {
@@ -92,11 +95,10 @@ export default function AdminPostersPage() {
       cell: (item: Poster) => (
         <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100 border flex items-center justify-center">
           <Image
-            src={item.thumbnailUrl || item.imageUrl}
+            src={item.thumbnailUrl || item.imageUrl || "https://placehold.co/100x150?text=No+Image"}
             alt={item.titleBn}
-            width={0}
-            height={0}
-            sizes="64px"
+            width={64}
+            height={80}
             className="w-full h-full object-contain"
           />
         </div>
@@ -201,7 +203,8 @@ export default function AdminPostersPage() {
 
       <DataTable
         columns={columns}
-        data={data?.content || []}
+        // ✅ নিশ্চিত করা হচ্ছে যেন ডাটা সবসময় অ্যারে থাকে (TypeError বন্ধ করতে)
+        data={Array.isArray(data?.content) ? data.content : []}
         isLoading={isLoading}
       />
 
