@@ -2,7 +2,6 @@
 import api from "@/lib/api";
 import { Poster, PosterPage } from "./posterService";
 
-// Public Poster Service
 export const publicPosterService = {
   getAll: async (page = 0, size = 12): Promise<PosterPage> => {
     const response = await api.get(`/posters?page=${page}&size=${size}`);
