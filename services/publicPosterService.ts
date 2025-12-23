@@ -1,29 +1,26 @@
 // services/publicPosterService.ts
-import api from "@/lib/api";
+import api, { apiRequest } from "@/lib/api"; // ✅ apiRequest ইমপোর্ট করুন
 import { Poster, PosterPage } from "./posterService";
 
 export const publicPosterService = {
   getAll: async (page = 0, size = 12): Promise<PosterPage> => {
-    const response = await api.get(`/posters?page=${page}&size=${size}`);
-    return response.data;
+    // ✅ সরাসরি return response.data এর বদলে apiRequest ব্যবহার করুন
+    return apiRequest(api.get(`/posters?page=${page}&size=${size}`));
   },
 
   getById: async (id: string): Promise<Poster> => {
-    const response = await api.get(`/posters/${id}`);
-    return response.data;
+    return apiRequest(api.get(`/posters/${id}`));
   },
 
   getFeatured: async (): Promise<Poster[]> => {
-    const response = await api.get(`/posters/featured`);
-    return response.data;
+    return apiRequest(api.get(`/posters/featured`));
   },
 
   getByType: async (type: string, page = 0, size = 12): Promise<PosterPage> => {
-    const response = await api.get(`/posters/type/${type}?page=${page}&size=${size}`);
-    return response.data;
+    return apiRequest(api.get(`/posters/type/${type}?page=${page}&size=${size}`));
   },
 
   trackDownload: async (id: string): Promise<void> => {
-    await api.post(`/posters/${id}/download`);
+    return apiRequest(api.post(`/posters/${id}/download`));
   },
 };
