@@ -37,10 +37,10 @@ export const OSMAN_HADI_INFO = {
     bn: "ঢাকা বিশ্ববিদ্যালয় কেন্দ্রীয় মসজিদ প্রাঙ্গণ",
     en: "Dhaka University Central Mosque",
   },
-  role: {
-    bn: "ইনকিলাব মঞ্চের মুখপাত্র",
-    en: "Spokesperson of Inqilab Moncho",
-  },
+role: {
+  bn: "বিপ্লবী জুলাই যোদ্ধা ও ইনকিলাব মঞ্চের মুখপাত্র",
+  en: "Revolutionary July Fighter & Spokesperson of Inqilab Moncho",
+},
 };
 
 export const VIDEO_TYPES = [
