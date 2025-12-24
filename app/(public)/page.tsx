@@ -2,6 +2,7 @@ import React from "react";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturedQuote from "@/components/home/FeaturedQuote";
 import QuickNavigation from "@/components/home/QuickNavigation";
+import JusticeCounter from "@/components/home/JusticeCounter"; 
 import MemorableQuotes from "@/components/home/MemorableQuotes";
 import LatestVideos from "@/components/home/LatestVideos";
 import PhotoGalleryPreview from "@/components/home/PhotoGalleryPreview";
@@ -18,6 +19,7 @@ export default function HomePage() {
       <HeroSection />
       <FeaturedQuote />
       <QuickNavigation />
+      <JusticeCounter />
       <MemorableQuotes />
       <LatestVideos />
       <PhotoGalleryPreview />
