@@ -66,7 +66,7 @@ export default function CallToAction() {
             </p>
             <div className="flex items-center justify-center gap-6">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/bridgebytetech"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white/70 hover:text-white transition-colors"
@@ -75,16 +75,16 @@ export default function CallToAction() {
               </a>
               <span className="text-white/30">•</span>
               <a
-                href="https://twitter.com"
+                href="https://www.instagram.com/bridgebytetech/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white/70 hover:text-white transition-colors"
               >
-                Twitter
+                Instagram
               </a>
               <span className="text-white/30">•</span>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@bridgebytetech"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white/70 hover:text-white transition-colors"
