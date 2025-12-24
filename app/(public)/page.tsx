@@ -17,9 +17,9 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
+      <JusticeCounter />
       <FeaturedQuote />
       <QuickNavigation />
-      <JusticeCounter />
       <MemorableQuotes />
       <LatestVideos />
       <PhotoGalleryPreview />
