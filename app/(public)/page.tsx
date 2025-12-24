@@ -5,6 +5,7 @@ import QuickNavigation from "@/components/home/QuickNavigation";
 import LatestVideos from "@/components/home/LatestVideos";
 import PhotoGalleryPreview from "@/components/home/PhotoGalleryPreview";
 import PosterGalleryPreview from "@/components/home/PosterGalleryPreview";
+import LatestNews from "@/components/home/LatestNews";
 import TimelineSummary from "@/components/home/TimelineSummary";
 import FeaturedEvents from "@/components/home/FeaturedEvents";
 import RecentTributes from "@/components/home/RecentTributes";
@@ -19,6 +20,7 @@ export default function HomePage() {
       <LatestVideos />
       <PhotoGalleryPreview />
       <PosterGalleryPreview />
+      <LatestNews /> 
       <TimelineSummary />
       <FeaturedEvents />
       <RecentTributes />
