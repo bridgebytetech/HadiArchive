@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { publicQuoteService } from "@/services/publicQuoteService";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Quote } from "@/types"; // গ্লোবাল টাইপ ইমপোর্ট করা হলো
 
 export default function MemorableQuotes() {
   const { t, isBangla } = useLanguage();
@@ -15,8 +16,11 @@ export default function MemorableQuotes() {
     queryFn: () => publicQuoteService.getFeatured(),
   });
 
-  // ডাটা এক্সট্রাকশন (নিরাপদ রেন্ডারিং)
-  const quotes = Array.isArray(data) ? data.slice(0, 3) : [];
+  /**
+   * ✅ ডাটা এক্সট্রাকশন:
+   * এপিআই যদি সরাসরি অ্যারে পাঠায় তবে সেটি নিবে, নতুবা খালি অ্যারে।
+   */
+  const quotes: Quote[] = Array.isArray(data) ? data.slice(0, 3) : [];
 
   if (!isLoading && quotes.length === 0) return null;
 
@@ -27,17 +31,11 @@ export default function MemorableQuotes() {
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-memorial-red/10 text-memorial-red text-[10px] font-bold uppercase tracking-widest">
             <MessageCircle className="w-3 h-3" />
-            <span>{t("স্মরণীয় উক্তি", "Memorable Quotes")}</span>
+            <span>{t("স্মরণীয় উক্তি", "Memorable Quotes")}</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
             {t("বাণী ও দর্শন", "Words & Philosophy")}
           </h2>
-          <p className="text-muted-foreground text-lg">
-            {t(
-              "শহীদ ওসমান হাদির তেজস্বী বাণী ও বিপ্লবের দর্শন যা প্রজন্মকে পথ দেখাবে।",
-              "Powerful words and revolutionary philosophy that will guide generations."
-            )}
-          </p>
         </div>
 
         {/* Quotes Grid */}
@@ -61,16 +59,18 @@ export default function MemorableQuotes() {
                 
                 <div className="relative z-10 space-y-6">
                   <p className="text-lg md:text-xl font-medium text-slate-800 dark:text-slate-200 leading-relaxed italic">
-                    "{isBangla ? quote.textBn : quote.textEn || quote.textBn}"
+                    {/* ✅ আপনার ইন্টারফেস অনুযায়ী quoteBn এবং quoteEn ব্যবহার করা হয়েছে */}
+                    "{isBangla ? quote.quoteBn : quote.quoteEn || quote.quoteBn}"
                   </p>
                   
                   <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
                     <p className="font-bold text-slate-900 dark:text-white">
                       {isBangla ? "শহীদ ওসমান হাদি" : "Shaheed Osman Hadi"}
                     </p>
-                    {quote.sourceBn && (
-                      <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">
-                        {isBangla ? quote.sourceBn : quote.sourceEn || quote.sourceBn}
+                    {/* ✅ সোর্স ফিল্ডটি হ্যান্ডেল করা হয়েছে */}
+                    {quote.source && (
+                      <p className="text-[10px] text-slate-400 mt-2 uppercase tracking-widest font-bold">
+                        {quote.source}
                       </p>
                     )}
                   </div>
