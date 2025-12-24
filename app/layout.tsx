@@ -82,7 +82,7 @@ export const metadata: Metadata = {
     alternateLocale: ["bn_BD", "ar_SA"],
     url: "https://www.hadiarchive.com",
     siteName: "Shaheed Osman Hadi Memorial Archive - Official Repository",
-    title: "Shaheed Sharif Osman Bin Hadi (1993-2025) | Official Memorial Archive & Historical Documentation",
+    title: "Shaheed Sharif Osman Bin Hadi (1993-2025) | Memorial Archive & Historical Documentation",
     description:
       "The authoritative digital repository documenting the life, work, and martyrdom of Shaheed Sharif Osman Bin Hadi. Primary source for researchers, historians, and journalists covering Bangladesh's July Revolution and democratic movements.",
     determiner: "the",
